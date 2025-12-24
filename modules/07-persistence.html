@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="iOS data persistence for Android developers. Learn SwiftData, Core Data, UserDefaults, and Keychain compared to Room and SharedPreferences."
+          name="description">
+    <title>iOS Persistence | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/07-persistence.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="iOS Persistence | iOS for Android Developers" property="og:title">
+    <meta content="iOS data persistence for Android developers. Learn SwiftData, Core Data, and Keychain."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/07-persistence.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="iOS Persistence | iOS for Android Developers" name="twitter:title">
+    <meta content="iOS data persistence for Room and SharedPreferences developers." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option selected value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 7</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">07</span>
+        <h1>Persistence</h1>
+        <p class="module-description">Core Data, SwiftData, UserDefaults, and Keychain. Map your Room and
+            SharedPreferences knowledge.</p>
+        <div class="estimated-time">Estimated time: 30 minutes</div>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Use UserDefaults for simple key-value storage</li>
+            <li>Store sensitive data in Keychain</li>
+            <li>Understand Core Data fundamentals</li>
+            <li>Use SwiftData for modern persistence</li>
+            <li>Choose the right persistence solution</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Persistence Concept Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>SharedPreferences</code></td>
+                    <td><code>UserDefaults</code></td>
+                    <td>Both store simple key-value pairs. UserDefaults uses property list types (String, Int, Bool,
+                        Data, Date, Array, Dictionary).
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>EncryptedSharedPreferences</code></td>
+                    <td><code>Keychain</code></td>
+                    <td>Keychain is hardware-backed secure storage. More complex API but offers fine-grained access
+                        control and iCloud sync.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Room</code></td>
+                    <td><code>Core Data</code> / <code>SwiftData</code></td>
+                    <td>SwiftData (iOS 17+) is the modern choice. Core Data is the mature ORM with more features but
+                        steeper learning curve.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>@Entity</code></td>
+                    <td><code>@Model</code> (SwiftData)</td>
+                    <td>SwiftData uses macros to define models. Core Data uses NSManagedObject subclasses or
+                        .xcdatamodeld files.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>@Dao</code></td>
+                    <td><code>ModelContext</code></td>
+                    <td>No separate DAO layer needed. ModelContext handles all CRUD operations directly on model
+                        objects.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Flow&lt;List&lt;T&gt;&gt;</code></td>
+                    <td><code>@Query</code></td>
+                    <td>SwiftData's @Query property wrapper auto-updates SwiftUI views. Similar to Room's Flow return
+                        types.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>UserDefaults</h2>
+        <p>UserDefaults is iOS's equivalent to SharedPreferences. It's a simple key-value store for user preferences and
+            small amounts of data. Unlike SharedPreferences, UserDefaults is synchronous by default and doesn't require
+            an editor pattern.</p>
+
+        <h3>Basic Usage</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Android</span></div>
+                <pre><code class="language-kotlin">// SharedPreferences
+val prefs = getSharedPreferences("app", MODE_PRIVATE)
+
+// Writing values
+prefs.edit().apply {
+    putString("username", "john")
+    putInt("loginCount", 5)
+    putBoolean("isPremium", true)
+    apply()  // or commit() for synchronous
+}
+
+// Reading values
+val username = prefs.getString("username", "")
+val loginCount = prefs.getInt("loginCount", 0)
+val isPremium = prefs.getBoolean("isPremium", false)
+
+// Removing values
+prefs.edit().remove("username").apply()
+
+// Clear all
+prefs.edit().clear().apply()</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// UserDefaults
+let defaults = UserDefaults.standard
+
+// Writing values (synchronous, no editor needed)
+defaults.set("john", forKey: "username")
+defaults.set(5, forKey: "loginCount")
+defaults.set(true, forKey: "isPremium")
+
+// Reading values
+let username = defaults.string(forKey: "username") ?? ""
+let loginCount = defaults.integer(forKey: "loginCount")
+let isPremium = defaults.bool(forKey: "isPremium")
+
+// Removing values
+defaults.removeObject(forKey: "username")
+
+// Clear all (no built-in method)
+if let bundleID = Bundle.main.bundleIdentifier {
+    defaults.removePersistentDomain(forName: bundleID)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Type-Safe Access with @AppStorage</h3>
+        <p>SwiftUI provides <code>@AppStorage</code>, a property wrapper that binds directly to UserDefaults:</p>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Using DataStore Preferences (modern approach)
+val DARK_MODE = booleanPreferencesKey("dark_mode")
+
+class SettingsViewModel(
+    private val dataStore: DataStore&lt;Preferences&gt;
+) : ViewModel() {
+
+    val darkMode: Flow&lt;Boolean&gt; = dataStore.data
+        .map { it[DARK_MODE] ?: false }
+
+    fun setDarkMode(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStore.edit { prefs ->
+                prefs[DARK_MODE] = enabled
+            }
+        }
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Using @AppStorage in SwiftUI
+struct SettingsView: View {
+    @AppStorage("darkMode") private var darkMode = false
+    @AppStorage("username") private var username = ""
+    @AppStorage("fontSize") private var fontSize = 14.0
+
+    var body: some View {
+        Form {
+            Toggle("Dark Mode", isOn: $darkMode)
+            TextField("Username", text: $username)
+            Slider(value: $fontSize, in: 10...24)
+        }
+    }
+}
+
+// Changes automatically persist to UserDefaults
+// and update across all views using same key</code></pre>
+            </div>
+        </div>
+
+        <h3>Storing Custom Types</h3>
+        <pre><code class="language-swift">// Store Codable objects in UserDefaults
+struct UserSettings: Codable {
+    var theme: String
+    var notificationsEnabled: Bool
+    var favoriteCategories: [String]
+}
+
+extension UserDefaults {
+    func setObject&lt;T: Codable&gt;(_ object: T, forKey key: String) {
+        let encoder = JSONEncoder()
+        if let data = try? encoder.encode(object) {
+            set(data, forKey: key)
+        }
+    }
+
+    func object&lt;T: Codable&gt;(_ type: T.Type, forKey key: String) -> T? {
+        guard let data = data(forKey: key) else { return nil }
+        let decoder = JSONDecoder()
+        return try? decoder.decode(type, from: data)
+    }
+}
+
+// Usage
+let settings = UserSettings(theme: "dark", notificationsEnabled: true, favoriteCategories: ["tech"])
+UserDefaults.standard.setObject(settings, forKey: "userSettings")
+
+let loaded = UserDefaults.standard.object(UserSettings.self, forKey: "userSettings")</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Unlike SharedPreferences which stores data immediately on <code>apply()</code>, UserDefaults batches
+                    writes periodically. Call <code>synchronize()</code> only if you need immediate persistence (e.g.,
+                    before app termination), but this is rarely necessary in practice.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Keychain</h2>
+        <p>Keychain is iOS's secure storage system, equivalent to Android's EncryptedSharedPreferences. It's
+            hardware-backed, encrypted, and survives app reinstalls. Unlike EncryptedSharedPreferences, Keychain uses a
+            low-level C API, so most developers use wrapper libraries.</p>
+
+        <h3>Raw Keychain API</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// EncryptedSharedPreferences
+val masterKey = MasterKey.Builder(context)
+    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+    .build()
+
+val securePrefs = EncryptedSharedPreferences.create(
+    context,
+    "secure_prefs",
+    masterKey,
+    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+)
+
+// Same API as regular SharedPreferences
+securePrefs.edit().putString("auth_token", token).apply()
+val token = securePrefs.getString("auth_token", null)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Raw Keychain API (verbose, use wrapper in practice)
+func saveToKeychain(token: String, account: String) -> Bool {
+    let data = token.data(using: .utf8)!
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: account,
+        kSecValueData as String: data
+    ]
+
+    SecItemDelete(query as CFDictionary)  // Remove existing
+    let status = SecItemAdd(query as CFDictionary, nil)
+    return status == errSecSuccess
+}
+
+func loadFromKeychain(account: String) -> String? {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: account,
+        kSecReturnData as String: true
+    ]
+
+    var result: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+    guard status == errSecSuccess,
+          let data = result as? Data else { return nil }
+    return String(data: data, encoding: .utf8)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Keychain Wrapper (Recommended)</h3>
+        <pre><code class="language-swift">// Simple Keychain wrapper class
+class KeychainManager {
+    static let shared = KeychainManager()
+
+    enum KeychainError: Error {
+        case itemNotFound
+        case duplicateItem
+        case unexpectedStatus(OSStatus)
+    }
+
+    func save(_ data: Data, service: String, account: String) throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecValueData as String: data
+        ]
+
+        let status = SecItemAdd(query as CFDictionary, nil)
+
+        if status == errSecDuplicateItem {
+            // Update existing item
+            let updateQuery: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account
+            ]
+            let updates: [String: Any] = [kSecValueData as String: data]
+            let updateStatus = SecItemUpdate(updateQuery as CFDictionary, updates as CFDictionary)
+            guard updateStatus == errSecSuccess else {
+                throw KeychainError.unexpectedStatus(updateStatus)
+            }
+        } else if status != errSecSuccess {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
+
+    func load(service: String, account: String) throws -> Data {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard status == errSecSuccess else {
+            throw KeychainError.itemNotFound
+        }
+        return result as! Data
+    }
+
+    func delete(service: String, account: String) throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
+}
+
+// Usage
+let tokenData = "secret_token".data(using: .utf8)!
+try KeychainManager.shared.save(tokenData, service: "MyApp", account: "authToken")
+
+let loadedData = try KeychainManager.shared.load(service: "MyApp", account: "authToken")
+let token = String(data: loadedData, encoding: .utf8)</code></pre>
+
+        <h3>Keychain Access Control</h3>
+        <pre><code class="language-swift">// Require biometric authentication to access
+func saveWithBiometrics(_ data: Data, account: String) throws {
+    let access = SecAccessControlCreateWithFlags(
+        nil,
+        kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+        .biometryCurrentSet,  // Requires Face ID / Touch ID
+        nil
+    )
+
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: account,
+        kSecValueData as String: data,
+        kSecAttrAccessControl as String: access as Any
+    ]
+
+    SecItemAdd(query as CFDictionary, nil)
+}
+
+// iCloud Keychain sync (for sharing between devices)
+let query: [String: Any] = [
+    kSecClass as String: kSecClassGenericPassword,
+    kSecAttrAccount as String: account,
+    kSecValueData as String: data,
+    kSecAttrSynchronizable as String: true  // Enable iCloud sync
+]</code></pre>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p>Keychain items persist after app uninstall! This is different from Android where
+                    EncryptedSharedPreferences are deleted with the app. If you need "fresh start" behavior, track first
+                    launch in UserDefaults and clear Keychain items accordingly. Also note that simulator Keychain
+                    behavior differs from real devices.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>SwiftData (iOS 17+)</h2>
+        <p>SwiftData is Apple's modern persistence framework, designed as a Swift-native replacement for Core Data. If
+            you know Room, you'll find SwiftData remarkably similar: both use annotations (macros in Swift) to define
+            schemas and provide reactive query capabilities.</p>
+
+        <h3>Defining Models</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin (Room)</span></div>
+                <pre><code class="language-kotlin">@Entity(tableName = "tasks")
+data class Task(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
+    val isCompleted: Boolean = false,
+    val dueDate: Date? = null,
+    @ColumnInfo(name = "created_at")
+    val createdAt: Date = Date()
+)
+
+// Type converters for Date
+@TypeConverter
+fun fromTimestamp(value: Long?): Date? =
+    value?.let { Date(it) }
+
+@TypeConverter
+fun dateToTimestamp(date: Date?): Long? =
+    date?.time</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift (SwiftData)</span></div>
+                <pre><code class="language-swift">import SwiftData
+
+@Model
+class Task {
+    var title: String
+    var isCompleted: Bool
+    var dueDate: Date?
+    var createdAt: Date
+
+    // SwiftData auto-generates id
+    // Date is natively supported, no converters needed
+
+    init(title: String, isCompleted: Bool = false,
+         dueDate: Date? = nil) {
+        self.title = title
+        self.isCompleted = isCompleted
+        self.dueDate = dueDate
+        self.createdAt = Date()
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Relationships</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin (Room)</span></div>
+                <pre><code class="language-kotlin">@Entity
+data class Category(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val name: String
+)
+
+@Entity(
+    foreignKeys = [ForeignKey(
+        entity = Category::class,
+        parentColumns = ["id"],
+        childColumns = ["categoryId"],
+        onDelete = ForeignKey.CASCADE
+    )]
+)
+data class Task(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
+    val categoryId: Long
+)
+
+// Query with relationship
+data class CategoryWithTasks(
+    @Embedded val category: Category,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "categoryId"
+    )
+    val tasks: List&lt;Task&gt;
+)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift (SwiftData)</span></div>
+                <pre><code class="language-swift">@Model
+class Category {
+    var name: String
+
+    // Inverse relationship auto-managed
+    @Relationship(deleteRule: .cascade, inverse: \Task.category)
+    var tasks: [Task] = []
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+@Model
+class Task {
+    var title: String
+    var category: Category?
+
+    init(title: String, category: Category? = nil) {
+        self.title = title
+        self.category = category
+    }
+}
+
+// No separate "WithTasks" class needed
+// Just access category.tasks directly</code></pre>
+            </div>
+        </div>
+
+        <h3>Setting Up the Container</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin (Room)</span></div>
+                <pre><code class="language-kotlin">@Database(
+    entities = [Task::class, Category::class],
+    version = 1
+)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun taskDao(): TaskDao
+    abstract fun categoryDao(): CategoryDao
+}
+
+// In Hilt module
+@Provides
+@Singleton
+fun provideDatabase(
+    @ApplicationContext context: Context
+): AppDatabase = Room.databaseBuilder(
+    context,
+    AppDatabase::class.java,
+    "app_database"
+).build()</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift (SwiftData)</span></div>
+                <pre><code class="language-swift">import SwiftUI
+import SwiftData
+
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .modelContainer(for: [Task.self, Category.self])
+    }
+}
+
+// Or configure manually
+let schema = Schema([Task.self, Category.self])
+let config = ModelConfiguration(
+    schema: schema,
+    isStoredInMemoryOnly: false
+)
+let container = try ModelContainer(
+    for: schema,
+    configurations: [config]
+)</code></pre>
+            </div>
+        </div>
+
+        <h3>CRUD Operations</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin (Room)</span></div>
+                <pre><code class="language-kotlin">@Dao
+interface TaskDao {
+    @Insert
+    suspend fun insert(task: Task)
+
+    @Update
+    suspend fun update(task: Task)
+
+    @Delete
+    suspend fun delete(task: Task)
+
+    @Query("SELECT * FROM tasks ORDER BY createdAt DESC")
+    fun getAllTasks(): Flow&lt;List&lt;Task&gt;&gt;
+
+    @Query("SELECT * FROM tasks WHERE isCompleted = 0")
+    fun getPendingTasks(): Flow&lt;List&lt;Task&gt;&gt;
+}
+
+// Usage in ViewModel
+viewModelScope.launch {
+    taskDao.insert(Task(title = "New Task"))
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift (SwiftData)</span></div>
+                <pre><code class="language-swift">// No DAO needed - use ModelContext directly
+
+struct TaskListView: View {
+    @Environment(\.modelContext) private var context
+
+    // Reactive query (like Flow)
+    @Query(sort: \Task.createdAt, order: .reverse)
+    private var tasks: [Task]
+
+    func addTask() {
+        let task = Task(title: "New Task")
+        context.insert(task)
+        // Auto-saves (or call try? context.save())
+    }
+
+    func deleteTask(_ task: Task) {
+        context.delete(task)
+    }
+
+    func updateTask(_ task: Task) {
+        task.isCompleted = true
+        // Changes tracked automatically
+    }
+}
+
+// Filtered query
+@Query(filter: #Predicate&lt;Task&gt; { !$0.isCompleted })
+private var pendingTasks: [Task]</code></pre>
+            </div>
+        </div>
+
+        <h3>Complex Queries</h3>
+        <pre><code class="language-swift">// Dynamic predicates
+struct TaskListView: View {
+    @State private var searchText = ""
+    @State private var showCompleted = false
+
+    var body: some View {
+        TaskResults(searchText: searchText, showCompleted: showCompleted)
+    }
+}
+
+struct TaskResults: View {
+    @Query private var tasks: [Task]
+
+    init(searchText: String, showCompleted: Bool) {
+        let predicate = #Predicate&lt;Task&gt; { task in
+            (searchText.isEmpty || task.title.contains(searchText)) &&
+            (showCompleted || !task.isCompleted)
+        }
+        _tasks = Query(filter: predicate, sort: \.createdAt)
+    }
+
+    var body: some View {
+        List(tasks) { task in
+            TaskRow(task: task)
+        }
+    }
+}
+
+// Fetch in non-View context
+func fetchTasks(context: ModelContext) throws -> [Task] {
+    let descriptor = FetchDescriptor&lt;Task&gt;(
+        predicate: #Predicate { !$0.isCompleted },
+        sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+    )
+    return try context.fetch(descriptor)
+}
+
+// Pagination
+var paginatedDescriptor = FetchDescriptor&lt;Task&gt;()
+paginatedDescriptor.fetchLimit = 20
+paginatedDescriptor.fetchOffset = page * 20</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>SwiftData's <code>@Query</code> property wrapper is conceptually identical to Room's <code>Flow&lt;List&lt;T&gt;&gt;</code>
+                    return type - both automatically update the UI when data changes. The key difference is SwiftData
+                    doesn't require a separate DAO layer; you interact with <code>ModelContext</code> directly.
+                    SwiftData also handles schema migrations automatically for simple changes, whereas Room requires
+                    explicit migration definitions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Core Data</h2>
+        <p>Core Data is Apple's original ORM, available since iOS 3. It's more powerful than SwiftData but has a steeper
+            learning curve. You'll encounter it in legacy codebases and when you need advanced features like CloudKit
+            sync, batch operations, or complex undo management.</p>
+
+        <h3>Core Data Setup</h3>
+        <pre><code class="language-swift">// 1. Create .xcdatamodeld file in Xcode (visual editor)
+// 2. Define entities (like Room's @Entity)
+// 3. Generate NSManagedObject subclasses
+
+// Core Data Stack
+class CoreDataStack {
+    static let shared = CoreDataStack()
+
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "MyAppModel")
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Core Data failed: \(error)")
+            }
+        }
+        return container
+    }()
+
+    var context: NSManagedObjectContext {
+        persistentContainer.viewContext
+    }
+
+    func save() {
+        guard context.hasChanges else { return }
+        do {
+            try context.save()
+        } catch {
+            print("Save failed: \(error)")
+        }
+    }
+}</code></pre>
+
+        <h3>Core Data CRUD</h3>
+        <pre><code class="language-swift">// Create
+let task = Task(context: CoreDataStack.shared.context)
+task.title = "New Task"
+task.createdAt = Date()
+CoreDataStack.shared.save()
+
+// Read
+let fetchRequest: NSFetchRequest&lt;Task&gt; = Task.fetchRequest()
+fetchRequest.predicate = NSPredicate(format: "isCompleted == %@", NSNumber(value: false))
+fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Task.createdAt, ascending: false)]
+
+let tasks = try? CoreDataStack.shared.context.fetch(fetchRequest)
+
+// Update
+task.isCompleted = true
+CoreDataStack.shared.save()
+
+// Delete
+CoreDataStack.shared.context.delete(task)
+CoreDataStack.shared.save()
+
+// Batch delete (efficient for large datasets)
+let batchDelete = NSBatchDeleteRequest(fetchRequest: fetchRequest as! NSFetchRequest&lt;NSFetchRequestResult&gt;)
+try? CoreDataStack.shared.context.execute(batchDelete)</code></pre>
+
+        <h3>Core Data with SwiftUI</h3>
+        <pre><code class="language-swift">// Use @FetchRequest for reactive queries
+struct TaskListView: View {
+    @Environment(\.managedObjectContext) private var context
+
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Task.createdAt, ascending: false)],
+        predicate: NSPredicate(format: "isCompleted == NO")
+    )
+    private var tasks: FetchedResults&lt;Task&gt;
+
+    var body: some View {
+        List(tasks) { task in
+            Text(task.title ?? "Untitled")
+        }
+    }
+}</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>For new iOS 17+ projects, use SwiftData. It's simpler and still uses Core Data under the hood. Use
+                    Core Data directly when you need: CloudKit sync (NSPersistentCloudKitContainer), batch operations,
+                    complex undo/redo, derived attributes, or if supporting iOS 16 and earlier.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>File System Storage</h2>
+        <p>For large files, binary data, or custom file formats, use the file system directly. iOS has a sandboxed file
+            system with specific directories for different purposes.</p>
+
+        <h3>Directory Structure</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Android</span></div>
+                <pre><code class="language-kotlin">// Internal storage (private to app)
+context.filesDir
+context.cacheDir
+
+// External storage (shared)
+context.getExternalFilesDir(null)
+Environment.getExternalStorageDirectory()
+
+// Writing files
+File(context.filesDir, "data.json").writeText(json)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">let fileManager = FileManager.default
+
+// Documents - user data, backed up
+let documents = fileManager.urls(
+    for: .documentDirectory, in: .userDomainMask
+).first!
+
+// Caches - temporary, not backed up
+let caches = fileManager.urls(
+    for: .cachesDirectory, in: .userDomainMask
+).first!
+
+// Application Support - app data, backed up
+let appSupport = fileManager.urls(
+    for: .applicationSupportDirectory, in: .userDomainMask
+).first!</code></pre>
+            </div>
+        </div>
+
+        <h3>File Operations</h3>
+        <pre><code class="language-swift">// Write JSON file
+func saveJSON&lt;T: Encodable&gt;(_ object: T, filename: String) throws {
+    let url = getDocumentsDirectory().appendingPathComponent(filename)
+    let data = try JSONEncoder().encode(object)
+    try data.write(to: url)
+}
+
+// Read JSON file
+func loadJSON&lt;T: Decodable&gt;(_ type: T.Type, filename: String) throws -> T {
+    let url = getDocumentsDirectory().appendingPathComponent(filename)
+    let data = try Data(contentsOf: url)
+    return try JSONDecoder().decode(type, from: data)
+}
+
+// Write image
+func saveImage(_ image: UIImage, name: String) throws {
+    let url = getDocumentsDirectory().appendingPathComponent("\(name).jpg")
+    guard let data = image.jpegData(compressionQuality: 0.8) else {
+        throw NSError(domain: "ImageError", code: 1)
+    }
+    try data.write(to: url)
+}
+
+// List files in directory
+func listFiles() -> [String] {
+    let path = getDocumentsDirectory().path
+    return (try? FileManager.default.contentsOfDirectory(atPath: path)) ?? []
+}
+
+// Delete file
+func deleteFile(_ filename: String) throws {
+    let url = getDocumentsDirectory().appendingPathComponent(filename)
+    try FileManager.default.removeItem(at: url)
+}
+
+// Check if file exists
+func fileExists(_ filename: String) -> Bool {
+    let url = getDocumentsDirectory().appendingPathComponent(filename)
+    return FileManager.default.fileExists(atPath: url.path)
+}
+
+private func getDocumentsDirectory() -> URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+}</code></pre>
+
+        <h3>File Coordination (Important for iOS)</h3>
+        <pre><code class="language-swift">// When multiple processes might access the same file
+// (e.g., app extensions, iCloud), use NSFileCoordinator
+
+func safeWrite(data: Data, to url: URL) throws {
+    var coordinatorError: NSError?
+    var writeError: Error?
+
+    let coordinator = NSFileCoordinator()
+    coordinator.coordinate(
+        writingItemAt: url,
+        options: .forReplacing,
+        error: &coordinatorError
+    ) { newURL in
+        do {
+            try data.write(to: newURL)
+        } catch {
+            writeError = error
+        }
+    }
+
+    if let error = coordinatorError ?? writeError {
+        throw error
+    }
+}</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>iOS's sandboxed file system is more restrictive than Android's. There's no equivalent to external
+                    storage or content providers for sharing files between apps. For cross-app sharing, use Share Sheet
+                    (UIActivityViewController), App Groups (for your own app family), or the document picker.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Common Pitfalls</h2>
+        <ul class="pitfalls-list">
+            <li><strong>UserDefaults for large data</strong>: UserDefaults is loaded entirely into memory at app launch.
+                Storing large objects (images, long arrays) will slow down startup. Use file system or database instead.
+            </li>
+            <li><strong>Keychain persistence after uninstall</strong>: Unlike Android, Keychain items survive app
+                deletion. If users reinstall your app, old tokens may still exist. Track first-launch state and clear
+                Keychain if needed.
+            </li>
+            <li><strong>SwiftData on background threads</strong>: ModelContext is not thread-safe. Create new contexts
+                for background work using <code>ModelContainer.mainContext</code> on main thread or
+                <code>@ModelActor</code> for background operations.
+            </li>
+            <li><strong>Not handling migration</strong>: SwiftData handles simple migrations automatically, but complex
+                schema changes (renaming, transforming data) require manual migration plans.
+            </li>
+            <li><strong>Blocking main thread with Core Data</strong>: Fetch requests block the calling thread. Use
+                <code>perform</code> or <code>performAndWait</code> with background contexts, or use
+                <code>@FetchRequest</code> which handles threading for you.
+            </li>
+            <li><strong>Forgetting to save context</strong>: Unlike Room which auto-saves after transactions, Core Data
+                requires explicit <code>context.save()</code>. SwiftData auto-saves, but only on main context changes.
+            </li>
+            <li><strong>iCloud backup of sensitive data</strong>: Files in Documents and Application Support are backed
+                up to iCloud by default. Mark sensitive files with <code>isExcludedFromBackup</code> or store in Caches.
+            </li>
+        </ul>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Use UserDefaults</li>
+            <li>Store secrets in Keychain</li>
+            <li>Set up SwiftData model</li>
+            <li>Perform CRUD operations</li>
+            <li>Understand Core Data basics</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a "Notes" app that demonstrates all persistence techniques covered in this module.</p>
+        <ol>
+            <li><strong>Create the SwiftData Model</strong>: Define a <code>Note</code> model with properties: id,
+                title, content, createdAt, isPinned. Add a <code>Folder</code> model with a one-to-many relationship to
+                notes.
+            </li>
+            <li><strong>Build the UI</strong>: Create a list view showing all notes using <code>@Query</code>. Add a
+                detail view for editing notes. Implement swipe-to-delete and mark-as-pinned functionality.
+            </li>
+            <li><strong>Add User Preferences</strong>: Use <code>@AppStorage</code> to persist: sort order (by date or
+                title), default folder, and theme preference. Create a Settings screen with toggles and pickers.
+            </li>
+            <li><strong>Implement Secure Login</strong>: Add optional PIN/biometric lock using Keychain. Store the PIN
+                hash in Keychain. Use LocalAuthentication framework for Face ID/Touch ID as alternative.
+            </li>
+            <li><strong>Export/Import Feature</strong>: Add ability to export all notes to a JSON file in Documents.
+                Implement import that reads JSON and creates notes. Show share sheet for the exported file.
+            </li>
+            <li><strong>Add Search</strong>: Implement dynamic search using <code>#Predicate</code> that filters notes
+                by title and content. Update results as user types.
+            </li>
+            <li><strong>Bonus</strong>: Add image attachments to notes using file system storage. Store image paths in
+                SwiftData, actual images in Documents directory.
+            </li>
+        </ol>
+        <div class="callout tip">
+            <div class="callout-title">Exercise Tip</div>
+            <div class="callout-content">
+                <p>Start with SwiftData setup and basic CRUD. Use <code>.modelContainer(for:)</code> modifier on your
+                    App struct. For the Keychain wrapper, consider using a library like KeychainAccess to simplify the
+                    API.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Use Case</th>
+                    <th>Solution</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Settings/preferences</td>
+                    <td><code>UserDefaults</code> / <code>@AppStorage</code></td>
+                    <td>Simple key-value, loaded at launch</td>
+                </tr>
+                <tr>
+                    <td>Tokens/passwords</td>
+                    <td><code>Keychain</code></td>
+                    <td>Hardware-encrypted, survives reinstall</td>
+                </tr>
+                <tr>
+                    <td>Structured data (iOS 17+)</td>
+                    <td><code>SwiftData</code></td>
+                    <td>Modern, Swift-native, auto-migrations</td>
+                </tr>
+                <tr>
+                    <td>Structured data (legacy)</td>
+                    <td><code>Core Data</code></td>
+                    <td>Powerful, CloudKit support</td>
+                </tr>
+                <tr>
+                    <td>Large files/images</td>
+                    <td>File system</td>
+                    <td>Use Documents or Application Support</td>
+                </tr>
+                <tr>
+                    <td>Cache data</td>
+                    <td><code>Caches</code> directory</td>
+                    <td>System may purge when low on space</td>
+                </tr>
+                <tr>
+                    <td>Share between app extensions</td>
+                    <td>App Groups + shared container</td>
+                    <td>Requires entitlement configuration</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References & Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/swiftdata" rel="noopener" target="_blank">SwiftData
+                Documentation</a> - Official Apple SwiftData reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/coredata" rel="noopener" target="_blank">Core Data
+                Programming Guide</a> - Comprehensive Core Data documentation
+            </li>
+            <li><a href="https://developer.apple.com/documentation/foundation/userdefaults" rel="noopener"
+                   target="_blank">UserDefaults Documentation</a> - Key-value storage reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/security/keychain_services" rel="noopener"
+                   target="_blank">Keychain Services</a> - Secure storage API reference
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2023/10187/" rel="noopener" target="_blank">WWDC23:
+                Meet SwiftData</a> - Introduction to SwiftData
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2023/10195/" rel="noopener" target="_blank">WWDC23:
+                Model your schema with SwiftData</a> - Deep dive into SwiftData models
+            </li>
+            <li><a href="https://developer.apple.com/documentation/foundation/filemanager" rel="noopener"
+                   target="_blank">FileManager Documentation</a> - File system operations reference
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="06-networking.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">Networking</span></a>
+        <a class="module-nav-link next" href="08-di-spm.html"><span class="module-nav-label">Next</span><span
+                class="module-nav-title">DI & SPM</span></a>
+    </nav>
+
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

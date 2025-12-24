@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="Dependency injection and Swift Package Manager for Android developers. Compare Hilt/Dagger patterns to iOS approaches and learn SPM vs Gradle."
+          name="description">
+    <title>DI & Swift Package Manager | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/08-di-spm.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="DI & Swift Package Manager | iOS for Android Developers" property="og:title">
+    <meta content="Dependency injection and Swift Package Manager for Android developers." property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/08-di-spm.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="DI & Swift Package Manager | iOS for Android Developers" name="twitter:title">
+    <meta content="Compare Hilt/Dagger patterns to iOS dependency injection." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option selected value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 8</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">08</span>
+        <h1>DI & Package Management</h1>
+        <p class="module-description">Dependency injection patterns in iOS and Swift Package Manager. Compare with
+            Hilt/Dagger and Gradle.</p>
+        <p class="module-time"><strong>Estimated time:</strong> 25 minutes</p>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Implement dependency injection patterns in Swift</li>
+            <li>Use Swift Package Manager (SPM)</li>
+            <li>Create and publish Swift packages</li>
+            <li>Understand iOS DI frameworks</li>
+            <li>Structure modular iOS projects</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>DI & Package Concept Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Hilt</code> / <code>Dagger</code></td>
+                    <td>Manual DI / Resolver / Swinject</td>
+                    <td>iOS favors manual DI with protocols; Swinject provides container-based DI similar to Dagger</td>
+                </tr>
+                <tr>
+                    <td><code>@Inject</code></td>
+                    <td>Constructor injection</td>
+                    <td>Swift uses explicit initializer parameters instead of annotations; dependencies are passed
+                        directly
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>@Module</code></td>
+                    <td>Factory / Container</td>
+                    <td>Create factory classes or use Swinject containers to configure dependency graphs</td>
+                </tr>
+                <tr>
+                    <td><code>Gradle</code></td>
+                    <td><code>SPM</code> / CocoaPods</td>
+                    <td>SPM is Apple's native solution, integrated into Xcode; CocoaPods is the legacy community tool
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>build.gradle</code></td>
+                    <td><code>Package.swift</code></td>
+                    <td>Swift manifest file defines targets, dependencies, and products in Swift code</td>
+                </tr>
+                <tr>
+                    <td>Maven Central</td>
+                    <td>GitHub / Swift Package Index</td>
+                    <td>No central repository; packages hosted on GitHub and discoverable via Swift Package Index</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Dependency Injection Patterns</h2>
+        <p>iOS development traditionally uses <strong>manual dependency injection</strong> rather than annotation-based
+            frameworks like Hilt. This approach is simpler, more explicit, and leverages Swift's protocol system to
+            achieve the same testability and flexibility you're used to with Dagger interfaces.</p>
+
+        <h3>Constructor Injection (The Foundation)</h3>
+        <p>The most common pattern in iOS is constructor injection, where dependencies are passed through the
+            initializer. This is equivalent to Hilt's <code>@Inject constructor</code> but without the annotations.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin + Hilt</span></div>
+                <pre><code class="language-kotlin">// Define interface
+interface UserRepository {
+    suspend fun getUser(id: String): User
+}
+
+// Implementation
+class UserRepositoryImpl @Inject constructor(
+    private val api: ApiService,
+    private val dao: UserDao
+) : UserRepository {
+    override suspend fun getUser(id: String): User {
+        return dao.getUser(id) ?: api.fetchUser(id)
+    }
+}
+
+// ViewModel with injected dependencies
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _user = MutableStateFlow&lt;User?&gt;(null)
+    val user: StateFlow&lt;User?&gt; = _user
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            _user.value = repository.getUser(id)
+        }
+    }
+}
+
+// Module configuration
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+    @Binds
+    abstract fun bindUserRepository(
+        impl: UserRepositoryImpl
+    ): UserRepository
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift (Manual DI)</span></div>
+                <pre><code class="language-swift">// Define protocol (like Kotlin interface)
+protocol UserRepository {
+    func getUser(id: String) async throws -> User
+}
+
+// Implementation
+final class UserRepositoryImpl: UserRepository {
+    private let api: APIService
+    private let storage: UserStorage
+
+    init(api: APIService, storage: UserStorage) {
+        self.api = api
+        self.storage = storage
+    }
+
+    func getUser(id: String) async throws -> User {
+        if let cached = try? await storage.getUser(id: id) {
+            return cached
+        }
+        return try await api.fetchUser(id: id)
+    }
+}
+
+// ViewModel with injected dependencies
+@MainActor
+final class UserViewModel: ObservableObject {
+    private let repository: UserRepository
+
+    @Published private(set) var user: User?
+
+    init(repository: UserRepository) {
+        self.repository = repository
+    }
+
+    func loadUser(id: String) async {
+        user = try? await repository.getUser(id: id)
+    }
+}
+
+// Factory for creating instances
+struct DependencyContainer {
+    static func makeUserViewModel() -> UserViewModel {
+        let api = APIServiceImpl()
+        let storage = UserStorageImpl()
+        let repository = UserRepositoryImpl(api: api, storage: storage)
+        return UserViewModel(repository: repository)
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Protocol-Based Dependencies</h3>
+        <p>Swift protocols serve the same purpose as Kotlin interfaces in DI. They define contracts that allow you to
+            swap implementations for testing or different environments.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin Interface</span></div>
+                <pre><code class="language-kotlin">interface AnalyticsService {
+    fun trackEvent(name: String, params: Map&lt;String, Any&gt;)
+    fun setUserId(id: String)
+}
+
+class FirebaseAnalytics : AnalyticsService {
+    override fun trackEvent(name: String, params: Map&lt;String, Any&gt;) {
+        Firebase.analytics.logEvent(name, bundleOf(*params.toList().toTypedArray()))
+    }
+    override fun setUserId(id: String) {
+        Firebase.analytics.setUserId(id)
+    }
+}
+
+class MockAnalytics : AnalyticsService {
+    val events = mutableListOf&lt;Pair&lt;String, Map&lt;String, Any&gt;&gt;&gt;()
+    override fun trackEvent(name: String, params: Map&lt;String, Any&gt;) {
+        events.add(name to params)
+    }
+    override fun setUserId(id: String) { }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Protocol</span></div>
+                <pre><code class="language-swift">protocol AnalyticsService {
+    func trackEvent(_ name: String, params: [String: Any])
+    func setUserId(_ id: String)
+}
+
+final class FirebaseAnalyticsService: AnalyticsService {
+    func trackEvent(_ name: String, params: [String: Any]) {
+        Analytics.logEvent(name, parameters: params)
+    }
+    func setUserId(_ id: String) {
+        Analytics.setUserID(id)
+    }
+}
+
+final class MockAnalyticsService: AnalyticsService {
+    private(set) var events: [(name: String, params: [String: Any])] = []
+
+    func trackEvent(_ name: String, params: [String: Any]) {
+        events.append((name, params))
+    }
+    func setUserId(_ id: String) { }
+}
+
+// Usage in ViewModel
+class CheckoutViewModel: ObservableObject {
+    private let analytics: AnalyticsService
+
+    init(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
+
+    func completePurchase() {
+        analytics.trackEvent("purchase_complete", params: ["total": 99.99])
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>SwiftUI Environment Injection</h3>
+        <p>SwiftUI provides a built-in dependency injection mechanism through the <strong>Environment</strong>. This is
+            similar to how Hilt provides dependencies at the Activity/Fragment level, but more declarative.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Hilt + Compose</span></div>
+                <pre><code class="language-kotlin">// Hilt provides ViewModel to Composable
+@Composable
+fun UserScreen(
+    viewModel: UserViewModel = hiltViewModel()
+) {
+    val user by viewModel.user.collectAsState()
+    // Use user data
+}
+
+// Custom dependency via CompositionLocal
+val LocalAnalytics = staticCompositionLocalOf&lt;AnalyticsService&gt; {
+    error("No analytics provided")
+}
+
+@Composable
+fun MyApp() {
+    CompositionLocalProvider(
+        LocalAnalytics provides FirebaseAnalytics()
+    ) {
+        MainScreen()
+    }
+}
+
+@Composable
+fun SomeScreen() {
+    val analytics = LocalAnalytics.current
+    analytics.trackEvent("screen_view", mapOf("name" to "some"))
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI Environment</span></div>
+                <pre><code class="language-swift">// Define custom environment key
+struct AnalyticsServiceKey: EnvironmentKey {
+    static let defaultValue: AnalyticsService = FirebaseAnalyticsService()
+}
+
+extension EnvironmentValues {
+    var analytics: AnalyticsService {
+        get { self[AnalyticsServiceKey.self] }
+        set { self[AnalyticsServiceKey.self] = newValue }
+    }
+}
+
+// Inject at root of app
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(\.analytics, FirebaseAnalyticsService())
+        }
+    }
+}
+
+// Access in any child view
+struct SomeScreen: View {
+    @Environment(\.analytics) private var analytics
+
+    var body: some View {
+        Button("Track") {
+            analytics.trackEvent("button_tap", params: [:])
+        }
+    }
+}
+
+// Override for previews/tests
+struct SomeScreen_Previews: PreviewProvider {
+    static var previews: some View {
+        SomeScreen()
+            .environment(\.analytics, MockAnalyticsService())
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS DI Comparison</div>
+            <div class="callout-content">
+                <p><strong>Key differences to understand:</strong></p>
+                <ul>
+                    <li><strong>No compile-time code generation:</strong> Unlike Dagger/Hilt, Swift DI doesn't generate
+                        code. Dependencies are wired manually or through runtime containers like Swinject.
+                    </li>
+                    <li><strong>Protocols vs Interfaces:</strong> Swift protocols are more powerful (protocol
+                        extensions, associated types) and serve the same DI purpose as Kotlin interfaces.
+                    </li>
+                    <li><strong>No @Inject annotation:</strong> Instead, you explicitly pass dependencies through
+                        initializers. This is more verbose but also more transparent.
+                    </li>
+                    <li><strong>Environment for UI:</strong> SwiftUI's Environment is the idiomatic way to inject
+                        dependencies into views, similar to CompositionLocal in Compose.
+                    </li>
+                    <li><strong>Simpler scoping:</strong> Without Hilt's automatic scoping (@Singleton,
+                        @ViewModelScoped), you manage object lifetimes explicitly through factories or singletons.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Swinject: Container-Based DI</h2>
+        <p>For larger projects that need more sophisticated DI, <strong>Swinject</strong> provides a container-based
+            approach similar to Dagger. It supports constructor injection, property injection, and scoped instances.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Dagger Module</span></div>
+                <pre><code class="language-kotlin">@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(LoggingInterceptor())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .client(client)
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    fun provideApiService(retrofit: Retrofit): ApiService {
+        return retrofit.create(ApiService::class.java)
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swinject Container</span></div>
+                <pre><code class="language-swift">import Swinject
+
+let container = Container()
+
+// Register dependencies (like @Provides)
+container.register(URLSession.self) { _ in
+    let config = URLSessionConfiguration.default
+    config.timeoutIntervalForRequest = 30
+    return URLSession(configuration: config)
+}.inObjectScope(.container) // Singleton scope
+
+container.register(APIClient.self) { resolver in
+    let session = resolver.resolve(URLSession.self)!
+    return APIClientImpl(session: session, baseURL: baseURL)
+}.inObjectScope(.container)
+
+container.register(UserRepository.self) { resolver in
+    let api = resolver.resolve(APIClient.self)!
+    return UserRepositoryImpl(api: api)
+}
+
+container.register(UserViewModel.self) { resolver in
+    let repository = resolver.resolve(UserRepository.self)!
+    return UserViewModel(repository: repository)
+}
+
+// Usage
+let viewModel = container.resolve(UserViewModel.self)!
+
+// With Swinject Storyboard extension (automatic injection)
+// Dependencies are injected when views are instantiated</code></pre>
+            </div>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">When to Use Swinject</div>
+            <div class="callout-content">
+                <p><strong>Use manual DI when:</strong> Your project is small-to-medium, has simple dependency graphs,
+                    or you want maximum transparency and compile-time safety.</p>
+                <p><strong>Use Swinject when:</strong> You have complex dependency graphs, need runtime configuration,
+                    want to centralize dependency management, or are porting a large Dagger-based project.</p>
+                <p>Most iOS projects start with manual DI and only adopt Swinject when the dependency graph becomes
+                    unwieldy.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Swift Package Manager</h2>
+        <p>Swift Package Manager (SPM) is Apple's official dependency management tool, integrated directly into Xcode.
+            It's analogous to Gradle for dependency management, though simpler in scope. Unlike Gradle, SPM focuses
+            purely on package management and doesn't handle build configuration, signing, or other project settings.</p>
+
+        <h3>Adding Dependencies in Xcode</h3>
+        <p>The easiest way to add a package is through Xcode's UI:</p>
+        <ol>
+            <li>Go to <strong>File -> Add Package Dependencies...</strong></li>
+            <li>Enter the package repository URL (e.g., <code>https://github.com/Alamofire/Alamofire</code>)</li>
+            <li>Choose version requirements (exact, up to next major, branch, or commit)</li>
+            <li>Select which targets should link the package</li>
+        </ol>
+
+        <h3>Package.swift vs build.gradle</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">build.gradle.kts</span></div>
+                <pre><code class="language-kotlin">plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
+}
+
+android {
+    namespace = "com.example.myapp"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.example.myapp"
+        minSdk = 24
+        targetSdk = 34
+    }
+}
+
+dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-compiler:2.48")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Package.swift</span></div>
+                <pre><code class="language-swift">// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "MyApp",
+    platforms: [
+        .iOS(.v15),
+        .macOS(.v12)
+    ],
+    products: [
+        .library(name: "MyAppCore", targets: ["MyAppCore"]),
+        .executable(name: "MyApp", targets: ["MyApp"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.8.0"),
+        .package(url: "https://github.com/Swinject/Swinject.git", from: "2.8.0"),
+        .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.0.0"),
+    ],
+    targets: [
+        .target(
+            name: "MyAppCore",
+            dependencies: [
+                "Alamofire",
+                "Swinject",
+                .product(name: "Dependencies", package: "swift-dependencies")
+            ]
+        ),
+        .testTarget(
+            name: "MyAppCoreTests",
+            dependencies: ["MyAppCore"]
+        )
+    ]
+)</code></pre>
+            </div>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">SPM vs Gradle Key Differences</div>
+            <div class="callout-content">
+                <ul>
+                    <li><strong>Single purpose:</strong> SPM only manages packages. Build settings, signing, and app
+                        configuration stay in the Xcode project file (.xcodeproj).
+                    </li>
+                    <li><strong>No version catalogs:</strong> Unlike Gradle's version catalog, SPM doesn't have
+                        centralized version management. Each package specifies its version inline.
+                    </li>
+                    <li><strong>Git-based:</strong> All SPM packages are Git repositories. Versions are Git tags.
+                        There's no central repository like Maven Central.
+                    </li>
+                    <li><strong>Written in Swift:</strong> Package.swift is actual Swift code, compiled by the Swift
+                        toolchain.
+                    </li>
+                    <li><strong>Local packages:</strong> You can create local packages to modularize your project,
+                        similar to Gradle modules.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Creating Swift Packages</h2>
+        <p>Creating reusable packages in Swift is straightforward. You can create packages for shared code within your
+            app or for distribution to other developers.</p>
+
+        <h3>Create a New Package</h3>
+        <pre><code class="language-bash"># Create from command line
+mkdir MyNetworkKit && cd MyNetworkKit
+swift package init --type library
+
+# This creates:
+# MyNetworkKit/
+# ├── Package.swift
+# ├── Sources/
+# │   └── MyNetworkKit/
+# │       └── MyNetworkKit.swift
+# └── Tests/
+#     └── MyNetworkKitTests/
+#         └── MyNetworkKitTests.swift</code></pre>
+
+        <h3>Package Structure Example</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Gradle Module</span></div>
+                <pre><code class="language-kotlin">// settings.gradle.kts
+include(":core:network")
+include(":core:database")
+include(":feature:auth")
+
+// core/network/build.gradle.kts
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
+
+android {
+    namespace = "com.example.core.network"
+}
+
+dependencies {
+    api("com.squareup.okhttp3:okhttp:4.12.0")
+    api("com.squareup.retrofit2:retrofit:2.9.0")
+}
+
+// feature/auth/build.gradle.kts
+dependencies {
+    implementation(project(":core:network"))
+    implementation(project(":core:database"))
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SPM Multi-Target</span></div>
+                <pre><code class="language-swift">// Package.swift
+let package = Package(
+    name: "AppModules",
+    platforms: [.iOS(.v15)],
+    products: [
+        .library(name: "NetworkKit", targets: ["NetworkKit"]),
+        .library(name: "DatabaseKit", targets: ["DatabaseKit"]),
+        .library(name: "AuthFeature", targets: ["AuthFeature"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.8.0"),
+    ],
+    targets: [
+        .target(
+            name: "NetworkKit",
+            dependencies: ["Alamofire"]
+        ),
+        .target(
+            name: "DatabaseKit",
+            dependencies: []
+        ),
+        .target(
+            name: "AuthFeature",
+            dependencies: ["NetworkKit", "DatabaseKit"]
+        ),
+        .testTarget(
+            name: "NetworkKitTests",
+            dependencies: ["NetworkKit"]
+        ),
+    ]
+)</code></pre>
+            </div>
+        </div>
+
+        <h3>Common SPM Commands</h3>
+        <pre><code class="language-bash"># Build the package
+swift build
+
+# Run tests
+swift test
+
+# Update dependencies
+swift package update
+
+# Generate Xcode project (rarely needed now)
+swift package generate-xcodeproj
+
+# Clean build artifacts
+swift package clean
+
+# Show dependency graph
+swift package show-dependencies</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>CocoaPods & Carthage</h2>
+        <p>While SPM is now the recommended approach, you'll encounter two legacy dependency managers in existing
+            projects:</p>
+
+        <h3>CocoaPods</h3>
+        <p>The most popular pre-SPM solution. Uses a Podfile (Ruby syntax) and modifies your Xcode project
+            significantly.</p>
+        <pre><code class="language-ruby"># Podfile
+platform :ios, '15.0'
+use_frameworks!
+
+target 'MyApp' do
+  pod 'Alamofire', '~> 5.8'
+  pod 'Kingfisher', '~> 7.0'
+  pod 'SnapKit', '~> 5.6'
+
+  target 'MyAppTests' do
+    inherit! :search_paths
+    pod 'Quick'
+    pod 'Nimble'
+  end
+end
+
+# Commands
+pod init          # Create Podfile
+pod install       # Install dependencies
+pod update        # Update dependencies
+pod deintegrate   # Remove CocoaPods from project</code></pre>
+
+        <h3>Carthage</h3>
+        <p>A more decentralized approach that builds frameworks without modifying your project structure.</p>
+        <pre><code class="language-bash"># Cartfile
+github "Alamofire/Alamofire" ~> 5.8
+github "onevcat/Kingfisher" ~> 7.0
+
+# Commands
+carthage update --platform iOS --use-xcframeworks</code></pre>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Legacy Dependency Managers</div>
+            <div class="callout-content">
+                <p><strong>For new projects:</strong> Use SPM exclusively. It's integrated into Xcode, requires no
+                    additional tools, and is Apple's official solution.</p>
+                <p><strong>For existing projects:</strong> You may encounter CocoaPods (most common) or Carthage.
+                    Gradual migration to SPM is recommended, but many libraries now support all three.</p>
+                <p><strong>Mixed usage:</strong> It's possible to use SPM and CocoaPods together in the same project if
+                    you need a library only available via pods, but this adds complexity.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Project Modularization</h2>
+        <p>Large iOS projects benefit from modularization, similar to Gradle multi-module projects. SPM local packages
+            are the modern way to achieve this.</p>
+
+        <h3>Modular Project Structure</h3>
+        <pre><code class="language-bash">MyApp/
+├── MyApp.xcodeproj           # Main app project
+├── MyApp/                    # App target sources
+│   ├── App.swift
+│   ├── ContentView.swift
+│   └── Features/
+├── Packages/                 # Local SPM packages
+│   ├── Core/
+│   │   ├── Package.swift
+│   │   └── Sources/
+│   │       ├── Networking/
+│   │       ├── Database/
+│   │       └── Common/
+│   ├── Features/
+│   │   ├── Package.swift
+│   │   └── Sources/
+│   │       ├── Auth/
+│   │       ├── Home/
+│   │       └── Profile/
+│   └── DesignSystem/
+│       ├── Package.swift
+│       └── Sources/
+│           └── DesignSystem/</code></pre>
+
+        <h3>Dependency Container for Modular Projects</h3>
+        <pre><code class="language-swift">// In Core/Sources/Common/DependencyContainer.swift
+public final class DependencyContainer {
+    public static let shared = DependencyContainer()
+
+    // Core services
+    public lazy var networkClient: NetworkClient = {
+        NetworkClientImpl(session: .shared)
+    }()
+
+    public lazy var database: DatabaseService = {
+        DatabaseServiceImpl()
+    }()
+
+    // Feature-specific dependencies
+    public func makeAuthViewModel() -> AuthViewModel {
+        AuthViewModel(
+            authService: AuthServiceImpl(network: networkClient),
+            storage: database
+        )
+    }
+
+    public func makeProfileViewModel(userId: String) -> ProfileViewModel {
+        ProfileViewModel(
+            userId: userId,
+            repository: UserRepositoryImpl(
+                network: networkClient,
+                cache: database
+            )
+        )
+    }
+}
+
+// In App target
+@main
+struct MyApp: App {
+    private let container = DependencyContainer.shared
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(container.makeAuthViewModel())
+        }
+    }
+}</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Modularization: Android vs iOS</div>
+            <div class="callout-content">
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Android (Gradle)</th>
+                        <th>iOS (SPM)</th>
+                    </tr>
+                    <tr>
+                        <td>Module definition</td>
+                        <td>settings.gradle + build.gradle</td>
+                        <td>Package.swift targets</td>
+                    </tr>
+                    <tr>
+                        <td>Internal visibility</td>
+                        <td><code>internal</code> modifier</td>
+                        <td><code>internal</code> (same) or <code>@_spi</code></td>
+                    </tr>
+                    <tr>
+                        <td>API vs Implementation</td>
+                        <td><code>api</code> vs <code>implementation</code></td>
+                        <td>No equivalent; all are public exports</td>
+                    </tr>
+                    <tr>
+                        <td>Build caching</td>
+                        <td>Gradle build cache</td>
+                        <td>SPM caches built packages</td>
+                    </tr>
+                    <tr>
+                        <td>Dynamic features</td>
+                        <td>Dynamic Feature Modules</td>
+                        <td>No direct equivalent</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Common Pitfalls</h2>
+        <div class="callout pitfall">
+            <div class="callout-title">1. Over-Engineering DI</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Setting up complex DI containers (like Swinject) for simple apps with few
+                    dependencies.</p>
+                <p><strong>Solution:</strong> Start with manual constructor injection. Only adopt a DI framework when
+                    your dependency graph becomes genuinely complex (20+ types, deep nesting).</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">2. Force-Unwrapping Resolved Dependencies</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Using <code>container.resolve(Service.self)!</code> throughout your code,
+                    risking runtime crashes.</p>
+                <pre><code class="language-swift">// Bad - crashes if not registered
+let service = container.resolve(UserService.self)!
+
+// Better - fail fast at startup
+guard let service = container.resolve(UserService.self) else {
+    fatalError("UserService not registered in container")
+}</code></pre>
+                <p><strong>Solution:</strong> Validate your container at app startup in debug builds, or use typed
+                    factory methods that hide the container.</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">3. Ignoring Access Control in Packages</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Forgetting to mark types as <code>public</code> in SPM packages, then
+                    wondering why they're not accessible.</p>
+                <pre><code class="language-swift">// In your package - this is internal by default!
+class NetworkClient { }  // Only visible within the package
+
+// Must be public to use from app target
+public class NetworkClient { }
+public init() { }  // Initializers also need public</code></pre>
+                <p><strong>Solution:</strong> Remember that Swift defaults to <code>internal</code> access. Explicitly
+                    mark your public API as <code>public</code>.</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">4. Circular Dependencies Between Packages</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Package A depends on Package B, and Package B depends on Package A.</p>
+                <p><strong>Solution:</strong> Extract shared types into a third "Core" or "Common" package that both can
+                    depend on. Use protocols to invert dependencies where needed.</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">5. Mixing CocoaPods and SPM Carelessly</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Adding the same library via both CocoaPods and SPM, causing duplicate
+                    symbol errors.</p>
+                <p><strong>Solution:</strong> Choose one package manager per library. When migrating, fully remove the
+                    CocoaPods version before adding via SPM.</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">6. Not Pinning Package Versions</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Using <code>.branch("main")</code> or very loose version requirements,
+                    leading to unexpected breaking changes.</p>
+                <pre><code class="language-swift">// Risky - main branch can change anytime
+.package(url: "...", branch: "main")
+
+// Too loose - allows breaking changes
+.package(url: "...", from: "1.0.0")  // Allows 2.0.0!
+
+// Better - pin to minor version
+.package(url: "...", .upToNextMinor(from: "1.2.0"))</code></pre>
+                <p><strong>Solution:</strong> Use <code>.upToNextMinor</code> or <code>.exact</code> for production
+                    apps. Commit your Package.resolved file.</p>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">7. Creating God Containers</div>
+            <div class="callout-content">
+                <p><strong>Mistake:</strong> Putting all dependencies in a single massive container, making it hard to
+                    understand and test.</p>
+                <p><strong>Solution:</strong> Organize dependencies by feature or layer. Create smaller, focused
+                    factories or use Swinject's Assembly pattern to group related registrations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Implement manual DI with constructor injection</li>
+            <li>Add SPM dependencies to a project</li>
+            <li>Create a local Swift package</li>
+            <li>Understand DI containers (Swinject)</li>
+            <li>Structure a modular project with packages</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a modular weather app with proper dependency injection. You'll create separate packages for networking
+            and data, then wire them together in the main app.</p>
+        <ol>
+            <li>
+                <strong>Create a NetworkKit package:</strong>
+                <ul>
+                    <li>Create a new Swift package: <code>File -> New -> Package</code></li>
+                    <li>Define a <code>WeatherAPI</code> protocol with a <code>fetchWeather(city: String) async throws
+                        -> WeatherData</code> method
+                    </li>
+                    <li>Implement <code>WeatherAPIImpl</code> using URLSession to call OpenWeatherMap API</li>
+                    <li>Create a <code>MockWeatherAPI</code> that returns hardcoded data for testing</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Create a WeatherRepository package:</strong>
+                <ul>
+                    <li>Define a <code>WeatherRepository</code> protocol</li>
+                    <li>Implement it with caching logic (check cache before network)</li>
+                    <li>Depend on NetworkKit for the API calls</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Wire up in the main app:</strong>
+                <ul>
+                    <li>Create a <code>DependencyContainer</code> that creates all dependencies</li>
+                    <li>Create a <code>WeatherViewModel</code> that depends on <code>WeatherRepository</code></li>
+                    <li>Inject the ViewModel into your SwiftUI view using <code>@StateObject</code></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Add Environment injection:</strong>
+                <ul>
+                    <li>Create a custom <code>EnvironmentKey</code> for the repository</li>
+                    <li>Inject it at the app root level</li>
+                    <li>Access it in child views using <code>@Environment</code></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Test with mock dependencies:</strong>
+                <ul>
+                    <li>In SwiftUI Previews, inject <code>MockWeatherAPI</code></li>
+                    <li>Verify your views work with different mock data scenarios</li>
+                </ul>
+            </li>
+        </ol>
+
+        <details>
+            <summary>Solution Hints</summary>
+            <pre><code class="language-swift">// NetworkKit/Sources/NetworkKit/WeatherAPI.swift
+public protocol WeatherAPI {
+    func fetchWeather(city: String) async throws -> WeatherData
+}
+
+public struct WeatherData: Codable, Sendable {
+    public let temperature: Double
+    public let description: String
+    public let city: String
+}
+
+public final class WeatherAPIImpl: WeatherAPI {
+    private let session: URLSession
+    private let apiKey: String
+
+    public init(session: URLSession = .shared, apiKey: String) {
+        self.session = session
+        self.apiKey = apiKey
+    }
+
+    public func fetchWeather(city: String) async throws -> WeatherData {
+        let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?q=\(city)&appid=\(apiKey)")!
+        let (data, _) = try await session.data(from: url)
+        return try JSONDecoder().decode(WeatherData.self, from: data)
+    }
+}
+
+// Main App - DependencyContainer.swift
+final class DependencyContainer {
+    static let shared = DependencyContainer()
+
+    private lazy var weatherAPI: WeatherAPI = {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["USE_MOCK"] != nil {
+            return MockWeatherAPI()
+        }
+        #endif
+        return WeatherAPIImpl(apiKey: Secrets.openWeatherAPIKey)
+    }()
+
+    func makeWeatherViewModel() -> WeatherViewModel {
+        WeatherViewModel(api: weatherAPI)
+    }
+}</code></pre>
+        </details>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Command/Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Add SPM dependency</td>
+                    <td>File -> Add Package Dependencies...</td>
+                </tr>
+                <tr>
+                    <td>Create package</td>
+                    <td><code>swift package init --type library</code></td>
+                </tr>
+                <tr>
+                    <td>Build package</td>
+                    <td><code>swift build</code></td>
+                </tr>
+                <tr>
+                    <td>Test package</td>
+                    <td><code>swift test</code></td>
+                </tr>
+                <tr>
+                    <td>Update packages</td>
+                    <td>File -> Packages -> Update to Latest Versions</td>
+                </tr>
+                <tr>
+                    <td>Reset package caches</td>
+                    <td>File -> Packages -> Reset Package Caches</td>
+                </tr>
+                <tr>
+                    <td>View dependency graph</td>
+                    <td><code>swift package show-dependencies</code></td>
+                </tr>
+                <tr>
+                    <td>Install CocoaPods</td>
+                    <td><code>sudo gem install cocoapods</code></td>
+                </tr>
+                <tr>
+                    <td>Install pods</td>
+                    <td><code>pod install</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References & Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/xcode/swift-packages" rel="noopener" target="_blank">Apple:
+                Swift Packages Documentation</a></li>
+            <li><a href="https://www.swift.org/documentation/package-manager/" rel="noopener" target="_blank">Swift.org:
+                Swift Package Manager</a></li>
+            <li><a href="https://swiftpackageindex.com/" rel="noopener" target="_blank">Swift Package Index</a> - Search
+                for Swift packages
+            </li>
+            <li><a href="https://github.com/Swinject/Swinject" rel="noopener" target="_blank">Swinject - DI Framework
+                for Swift</a></li>
+            <li><a href="https://github.com/pointfreeco/swift-dependencies" rel="noopener" target="_blank">Point-Free
+                Dependencies</a> - Modern DI library from Point-Free
+            </li>
+            <li><a href="https://www.pointfree.co/collections/dependencies" rel="noopener" target="_blank">Point-Free:
+                Dependency Management Collection</a></li>
+            <li><a href="https://cocoapods.org/" rel="noopener" target="_blank">CocoaPods</a> - Legacy dependency
+                manager
+            </li>
+            <li><a href="https://www.avanderlee.com/swift/dependency-injection/" rel="noopener" target="_blank">SwiftLee:
+                Dependency Injection in Swift</a></li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="07-persistence.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">Persistence</span></a>
+        <a class="module-nav-link next" href="09-testing.html"><span class="module-nav-label">Next</span><span
+                class="module-nav-title">Testing</span></a>
+    </nav>
+
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ruby.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

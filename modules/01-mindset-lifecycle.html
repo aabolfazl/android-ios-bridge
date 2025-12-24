@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="Learn iOS platform philosophy and app lifecycle as an Android developer. Master app states, scene management, and UIViewController lifecycle."
+          name="description">
+    <title>Mindset & App Lifecycle | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/01-mindset-lifecycle.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="Mindset & App Lifecycle | iOS for Android Developers" property="og:title">
+    <meta content="Learn iOS platform philosophy and app lifecycle as an Android developer. Master app states and scene management."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/01-mindset-lifecycle.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="Mindset & App Lifecycle | iOS for Android Developers" name="twitter:title">
+    <meta content="Learn iOS platform philosophy and app lifecycle as an Android developer." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option selected value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 1</span>
+    </nav>
+
+    <!-- Module Header -->
+    <header class="module-header">
+        <span class="module-number">01</span>
+        <h1>Mindset & App Lifecycle</h1>
+        <p class="module-description">Understand how iOS thinks differently from Android. Master app states, scene
+            management, and platform philosophy.</p>
+        <span class="estimated-time">Estimated time: ~30 minutes</span>
+    </header>
+
+    <!-- Learning Outcomes -->
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>You will be able to map Android app lifecycle concepts to their iOS equivalents and handle state
+                transitions correctly
+            </li>
+            <li>You will be able to implement scene-based multi-window support using UISceneDelegate and understand when
+                to use AppDelegate vs SceneDelegate
+            </li>
+            <li>You will be able to navigate Xcode's project structure confidently and understand iOS platform
+                conventions that differ from Android Studio
+            </li>
+        </ul>
+    </section>
+
+    <!-- Concept Mapping Table -->
+    <section class="section">
+        <h2>Android to iOS Concept Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android Concept</th>
+                    <th>iOS Equivalent</th>
+                    <th>Key Differences</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Activity</code></td>
+                    <td><code>UIViewController</code></td>
+                    <td>iOS ViewControllers don't have their own lifecycle like Activities. They're managed by a
+                        navigation hierarchy, not a back stack.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Application</code> class</td>
+                    <td><code>AppDelegate</code> / <code>@main App</code></td>
+                    <td>AppDelegate handles app-level events. SwiftUI apps use <code>@main App</code> struct with
+                        scene-based lifecycle.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Fragment</code></td>
+                    <td>Child <code>UIViewController</code> / SwiftUI View</td>
+                    <td>iOS has no Fragment equivalent. Use container view controllers or SwiftUI's compositional
+                        views.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Intent</code></td>
+                    <td>URL Schemes / Universal Links / <code>NSUserActivity</code></td>
+                    <td>No direct Intent equivalent. Deep linking uses URL schemes. Inter-app communication is
+                        restricted.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>onCreate</code> / <code>onDestroy</code></td>
+                    <td><code>viewDidLoad</code> / <code>deinit</code></td>
+                    <td><code>viewDidLoad</code> is called once when the view hierarchy is loaded. <code>deinit</code>
+                        is a Swift deinitializer (like finalizer).
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>onResume</code> / <code>onPause</code></td>
+                    <td><code>viewWillAppear</code> / <code>viewWillDisappear</code></td>
+                    <td>iOS separates "will" and "did" variants. Use <code>viewDidAppear</code> for post-animation work.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>savedInstanceState</code></td>
+                    <td><code>NSUserActivity</code> / State Restoration</td>
+                    <td>iOS state restoration is opt-in and more complex. SwiftUI uses <code>@SceneStorage</code> for
+                        automatic persistence.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Multi-window (Android 7+)</td>
+                    <td>Scenes (iOS 13+)</td>
+                    <td>iOS scenes are first-class citizens. Each scene has independent state via
+                        <code>UISceneDelegate</code>.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Core Concepts -->
+    <section class="section">
+        <h2>Platform Philosophy: Apple vs Google</h2>
+        <p>Before diving into code, understand the fundamental philosophical differences that shape iOS development:</p>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS Philosophy</div>
+            <div class="callout-content">
+                <p><strong>Android:</strong> Flexibility and openness. Multiple ways to achieve goals. OEMs customize
+                    freely. Background execution is permissive.</p>
+                <p><strong>iOS:</strong> Opinionated and controlled. Apple defines "the right way." Consistency across
+                    devices. Background execution is strictly limited for battery/privacy.</p>
+            </div>
+        </div>
+
+        <p>Key philosophical differences that affect your daily work:</p>
+        <ul>
+            <li><strong>Single hardware vendor:</strong> No need for manufacturer-specific workarounds. Test on
+                Simulator + 1-2 physical devices.
+            </li>
+            <li><strong>Strict App Review:</strong> Apple enforces Human Interface Guidelines. Deviating from platform
+                conventions may cause rejection.
+            </li>
+            <li><strong>Privacy-first:</strong> Background execution, location access, and tracking require explicit
+                user consent with system dialogs.
+            </li>
+            <li><strong>Walled garden:</strong> No sideloading (outside EU). Limited inter-app communication. No custom
+                launchers or default app replacement.
+            </li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>App Lifecycle States</h2>
+        <p>iOS apps transition through five distinct states. Unlike Android, there's no equivalent to <code>onStart/onStop</code>
+            — iOS uses a simpler model:</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>iOS State</th>
+                    <th>Description</th>
+                    <th>Android Equivalent</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Not Running</code></td>
+                    <td>App is not launched or was terminated by the system</td>
+                    <td>Process killed / not started</td>
+                </tr>
+                <tr>
+                    <td><code>Inactive</code></td>
+                    <td>App is in foreground but not receiving events (e.g., incoming call overlay)</td>
+                    <td>~<code>onPause</code> (partially visible)</td>
+                </tr>
+                <tr>
+                    <td><code>Active</code></td>
+                    <td>App is in foreground and receiving events</td>
+                    <td><code>onResume</code></td>
+                </tr>
+                <tr>
+                    <td><code>Background</code></td>
+                    <td>App is executing code but not visible. Limited time (~30 seconds)</td>
+                    <td><code>onStop</code> + background service (but heavily restricted)</td>
+                </tr>
+                <tr>
+                    <td><code>Suspended</code></td>
+                    <td>App is in memory but not executing code. Can be purged anytime.</td>
+                    <td>Cached process (similar)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// UIKit: AppDelegate lifecycle methods
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // App launched. Initialize SDKs, configure appearance.
+        // Equivalent to Android's Application.onCreate()
+        return true
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // App moved to Active state. Resume tasks, refresh UI.
+        // Similar to onResume()
+    }
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        // App moving to Inactive. Pause ongoing tasks.
+        // Similar to onPause()
+    }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // App is now in background. Save state, release resources.
+        // You have ~30 seconds before suspension.
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // App is about to terminate. Rare - usually goes to Suspended first.
+        // Not guaranteed to be called. Don't rely on it for critical saves.
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>In modern iOS (13+), use <code>SceneDelegate</code> for UI lifecycle events. <code>AppDelegate</code>
+                    is for app-wide events like push notification registration and background URL sessions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Scene-Based Architecture (iOS 13+)</h2>
+        <p>iOS 13 introduced Scenes for multi-window support on iPad. Even on iPhone, scenes are the modern way to
+            manage UI lifecycle.</p>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS Multi-Window</div>
+            <div class="callout-content">
+                <p><strong>Android:</strong> Multi-window is Activity-based. Each Activity can be in split-screen. You
+                    check <code>isInMultiWindowMode()</code>.</p>
+                <p><strong>iOS:</strong> Each Scene is an independent instance of your UI. iPad users can have multiple
+                    windows of your app. Each scene has its own <code>SceneDelegate</code>.</p>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// SceneDelegate handles per-window lifecycle
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+        // Scene is being created. Set up your root view controller.
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+
+        window = UIWindow(windowScene: windowScene)
+        window?.rootViewController = MainViewController()
+        window?.makeKeyAndVisible()
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        // This specific scene became active (user switched to this window)
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        // This scene is moving to inactive (another window focused)
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        // Save scene-specific state. Each scene has independent state.
+    }
+
+    func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
+        // Return activity for state restoration when scene reconnects
+        return scene.userActivity
+    }
+}</code></pre>
+        </div>
+
+        <p><strong>SwiftUI Scene Management:</strong></p>
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// SwiftUI: Scene-based app structure
+@main
+struct CatalogApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            switch newPhase {
+            case .active:
+                print("App is active")
+            case .inactive:
+                print("App is inactive")
+            case .background:
+                print("App entered background")
+                // Save state here
+            @unknown default:
+                break
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Background Execution</h2>
+        <p>This is where iOS differs most dramatically from Android. iOS strictly limits background execution to
+            preserve battery and privacy.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Background Mode</th>
+                    <th>Use Case</th>
+                    <th>Android Equivalent</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Background Tasks</td>
+                    <td>Deferred work (sync, cleanup). System decides when to run.</td>
+                    <td>WorkManager</td>
+                </tr>
+                <tr>
+                    <td>Background Fetch</td>
+                    <td>Periodic content updates. Frequency determined by system based on usage patterns.</td>
+                    <td>WorkManager with periodic constraints</td>
+                </tr>
+                <tr>
+                    <td>Push Notifications</td>
+                    <td>Wake app briefly to process silent notification</td>
+                    <td>FCM data messages</td>
+                </tr>
+                <tr>
+                    <td>Location Updates</td>
+                    <td>Continuous location tracking (navigation apps)</td>
+                    <td>Foreground service with location</td>
+                </tr>
+                <tr>
+                    <td>Audio/VoIP</td>
+                    <td>Play audio or handle calls in background</td>
+                    <td>Foreground service with media/phone type</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">import BackgroundTasks
+
+// Register background task in AppDelegate
+func application(_ application: UIApplication,
+                 didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+    BGTaskScheduler.shared.register(
+        forTaskWithIdentifier: "com.app.refresh",
+        using: nil
+    ) { task in
+        self.handleAppRefresh(task: task as! BGAppRefreshTask)
+    }
+    return true
+}
+
+// Schedule the task
+func scheduleAppRefresh() {
+    let request = BGAppRefreshTaskRequest(identifier: "com.app.refresh")
+    request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60) // 15 minutes minimum
+
+    do {
+        try BGTaskScheduler.shared.submit(request)
+    } catch {
+        print("Failed to schedule: \(error)")
+    }
+}
+
+// Handle the task
+func handleAppRefresh(task: BGAppRefreshTask) {
+    scheduleAppRefresh() // Schedule next occurrence
+
+    let operation = RefreshOperation()
+
+    task.expirationHandler = {
+        operation.cancel()
+    }
+
+    operation.completionBlock = {
+        task.setTaskCompleted(success: !operation.isCancelled)
+    }
+
+    OperationQueue.main.addOperation(operation)
+}</code></pre>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p><strong>Don't assume background tasks will run on schedule.</strong> iOS decides when to execute
+                    based on battery, network conditions, and app usage patterns. An app the user rarely opens may never
+                    get background time. This is fundamentally different from Android's WorkManager guarantees.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Xcode Project Structure</h2>
+        <p>Coming from Android Studio, Xcode's project organization will feel different:</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android Studio</th>
+                    <th>Xcode</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>build.gradle</code></td>
+                    <td>Project settings in Xcode UI / <code>Package.swift</code> for SPM</td>
+                </tr>
+                <tr>
+                    <td><code>AndroidManifest.xml</code></td>
+                    <td><code>Info.plist</code> + Xcode Signing & Capabilities</td>
+                </tr>
+                <tr>
+                    <td><code>res/</code> folder</td>
+                    <td><code>Assets.xcassets</code> + <code>.strings</code> files</td>
+                </tr>
+                <tr>
+                    <td><code>src/main/java/</code></td>
+                    <td>Swift files directly in project (no package structure enforced)</td>
+                </tr>
+                <tr>
+                    <td>Product flavors</td>
+                    <td>Schemes + Build Configurations</td>
+                </tr>
+                <tr>
+                    <td>Gradle modules</td>
+                    <td>Xcode targets / Swift Packages</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><strong>Key files in an iOS project:</strong></p>
+        <ul>
+            <li><code>*.xcodeproj</code> or <code>*.xcworkspace</code> — Project file (always open .xcworkspace if it
+                exists)
+            </li>
+            <li><code>Info.plist</code> — App configuration (permissions, URL schemes, app transport security)</li>
+            <li><code>Assets.xcassets</code> — Images, colors, app icon</li>
+            <li><code>*.entitlements</code> — App capabilities (push notifications, app groups, iCloud)</li>
+            <li><code>LaunchScreen.storyboard</code> — Static launch screen (not a splash screen activity)</li>
+        </ul>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Unlike Android where you declare permissions in the manifest, iOS permissions are requested at
+                    runtime. However, you must still add usage description strings to <code>Info.plist</code> explaining
+                    why you need each permission (e.g., <code>NSCameraUsageDescription</code>).</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>ViewController Lifecycle vs Activity Lifecycle</h2>
+        <p>While both manage screen content, the lifecycle patterns differ significantly:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label">
+                    <span class="platform-android">Android Activity</span>
+                </div>
+                <pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedState: Bundle?) {
+        super.onCreate(savedState)
+        setContentView(R.layout.activity_main)
+        // Initialize views, restore state
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Becoming visible
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Interactive, register listeners
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Losing focus, unregister
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Not visible
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cleanup
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label">
+                    <span class="platform-ios">iOS ViewController</span>
+                </div>
+                <pre><code class="language-swift">class MainViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Called once. Initialize subviews.
+        // NOT called again on back navigation.
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // About to appear. Refresh data.
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Visible. Start animations.
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // About to hide. Save state.
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        // Hidden. Pause expensive operations.
+    }
+
+    deinit {
+        // Deallocation. Cleanup observers.
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Key Difference</div>
+            <div class="callout-content">
+                <p><strong>ViewControllers are NOT recreated on back navigation.</strong> When you pop a navigation
+                    stack, <code>viewWillAppear</code> is called, NOT <code>viewDidLoad</code>. This is unlike
+                    Activities where <code>onCreate</code> runs again if the Activity was destroyed. Put data refresh
+                    logic in <code>viewWillAppear</code>, not <code>viewDidLoad</code>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Common Pitfalls Section -->
+    <section class="section">
+        <h2>Common Pitfalls for Android Developers</h2>
+        <ul class="pitfalls-list">
+            <li><strong>Expecting background services:</strong> iOS has no equivalent to Android's long-running
+                foreground services. Background execution is granted only for specific use cases (audio, location, VoIP)
+                and is strictly limited.
+            </li>
+            <li><strong>Relying on <code>applicationWillTerminate</code>:</strong> This method is rarely called. The
+                system usually suspends your app first, then terminates it without notification. Save state in <code>sceneDidEnterBackground</code>.
+            </li>
+            <li><strong>Treating viewDidLoad like onCreate:</strong> <code>viewDidLoad</code> is called once per view
+                controller instance. When navigating back, only <code>viewWillAppear</code>/<code>viewDidAppear</code>
+                are called. Put refresh logic there.
+            </li>
+            <li><strong>Not handling scene disconnection:</strong> On iPad, users can close individual windows. Your
+                scene may be disconnected while the app continues running. Handle <code>sceneDidDisconnect</code> to
+                save per-scene state.
+            </li>
+            <li><strong>Ignoring Inactive state:</strong> iOS has an Inactive state between Active and Background (e.g.,
+                during Control Center pulldown). Pause sensitive operations in <code>willResignActive</code>.
+            </li>
+            <li><strong>Using blocking I/O on main thread:</strong> iOS is even less forgiving than Android. The
+                watchdog will terminate your app if the main thread is blocked for too long (typically 10-20 seconds
+                during launch).
+            </li>
+            <li><strong>Assuming file paths are stable:</strong> iOS app containers can be moved between updates. Always
+                use APIs like <code>FileManager.default.urls(for:in:)</code> instead of hardcoded paths.
+            </li>
+            <li><strong>Not understanding state restoration:</strong> iOS doesn't automatically restore your navigation
+                stack. You need to implement <code>NSUserActivity</code> or <code>@SceneStorage</code> (SwiftUI) to
+                preserve state across terminations.
+            </li>
+        </ul>
+    </section>
+
+    <!-- Industry Pattern -->
+    <section class="industry-pattern">
+        <h2>Industry Pattern</h2>
+        <p>In production iOS apps, lifecycle management typically follows this pattern:</p>
+        <ul>
+            <li><strong>AppDelegate:</strong> Minimal. Registers for push notifications, configures background tasks,
+                initializes crash reporting/analytics.
+            </li>
+            <li><strong>SceneDelegate (UIKit):</strong> Sets up the root view controller, handles deep links via <code>connectionOptions</code>,
+                manages per-scene state.
+            </li>
+            <li><strong>@main App (SwiftUI):</strong> Observes <code>scenePhase</code> for lifecycle events, uses <code>@SceneStorage</code>
+                for lightweight state persistence.
+            </li>
+            <li><strong>Coordinator/Router:</strong> Navigation logic lives in a dedicated layer, not in
+                ViewControllers. This makes testing and deep linking easier.
+            </li>
+            <li><strong>Background sync:</strong> Use <code>BGAppRefreshTask</code> for periodic sync. For critical
+                updates, rely on silent push notifications. Never assume background tasks will run.
+            </li>
+        </ul>
+    </section>
+
+    <!-- Mini App Reference -->
+    <div class="mini-app-reference">
+        <h4>Mini App: Catalog</h4>
+        <p>Throughout these modules, we'll build a simple product catalog app with search, details, and favorites. This
+            module sets up the basic app structure with proper lifecycle handling.</p>
+    </div>
+
+    <!-- Exercise -->
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Create a new iOS project and observe lifecycle events:</p>
+        <ol>
+            <li>Create a new Xcode project: File → New → Project → App (SwiftUI)</li>
+            <li>Add lifecycle logging:
+                <pre><code class="language-swift">@main
+struct CatalogApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            print("Scene phase: \(phase)")
+        }
+    }
+}</code></pre>
+            </li>
+            <li>Run on Simulator. Press Home, return to app, trigger Control Center. Observe the console output.</li>
+            <li>On iPad Simulator, try Split View. Create a second window of your app (Window menu → Tile Window to
+                Right of Screen). Notice each window triggers independent lifecycle events.
+            </li>
+        </ol>
+        <p><strong>Expected outcome:</strong> You'll see <code>.active</code>, <code>.inactive</code>, and <code>.background</code>
+            states logged. On iPad with multiple windows, you'll see lifecycle events are per-scene, not per-app.</p>
+    </section>
+
+    <!-- Module Checklist -->
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Understand the 5 iOS app states and their Android equivalents</li>
+            <li>Know when to use AppDelegate vs SceneDelegate</li>
+            <li>Understand iOS background execution limitations</li>
+            <li>Navigate Xcode project structure</li>
+            <li>Map ViewController lifecycle to Activity lifecycle</li>
+            <li>Complete the hands-on exercise</li>
+        </ul>
+    </section>
+
+    <!-- Cheat Sheet -->
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <ul>
+            <li><code>AppDelegate</code> → App-wide events (push registration, background tasks)</li>
+            <li><code>SceneDelegate</code> → Per-window UI lifecycle (iOS 13+)</li>
+            <li><code>@Environment(\.scenePhase)</code> → SwiftUI lifecycle observation</li>
+            <li><code>viewDidLoad</code> → Called once; <code>viewWillAppear</code> → Called every time visible</li>
+            <li><code>BGTaskScheduler</code> → Background work (not guaranteed to run)</li>
+            <li><code>Info.plist</code> → Permissions, URL schemes, app configuration</li>
+            <li>Background limit: ~30 seconds of execution time, then suspended</li>
+            <li>State restoration: <code>NSUserActivity</code> (UIKit) or <code>@SceneStorage</code> (SwiftUI)</li>
+        </ul>
+    </section>
+
+    <!-- References -->
+    <section class="references">
+        <h2>References</h2>
+        <ul>
+            <li>
+                <a href="https://developer.apple.com/documentation/uikit/app_and_environment/managing_your_app_s_life_cycle"
+                   rel="noopener" target="_blank">Apple Docs: Managing Your App's Life Cycle</a></li>
+            <li><a href="https://developer.apple.com/documentation/uikit/uiscenedelegate" rel="noopener"
+                   target="_blank">Apple Docs: UISceneDelegate</a></li>
+            <li><a href="https://developer.apple.com/documentation/backgroundtasks" rel="noopener" target="_blank">Apple
+                Docs: BackgroundTasks Framework</a></li>
+            <li><a href="https://developer.apple.com/documentation/swiftui/scenephase" rel="noopener" target="_blank">Apple
+                Docs: ScenePhase (SwiftUI)</a></li>
+            <li><a href="https://github.com/pointfreeco/swift-composable-architecture" rel="noopener" target="_blank">pointfreeco/swift-composable-architecture</a>
+                — Example of production-grade app lifecycle handling in a popular architecture
+            </li>
+        </ul>
+    </section>
+
+    <!-- Module Navigation -->
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="../index.html">
+            <span class="module-nav-label">← Back</span>
+            <span class="module-nav-title">All Modules</span>
+        </a>
+        <a class="module-nav-link next" href="02-swift-for-kotlin.html">
+            <span class="module-nav-label">Next →</span>
+            <span class="module-nav-title">Swift for Kotlin Devs</span>
+        </a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

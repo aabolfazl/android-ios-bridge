@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="From Kotlin coroutines to Swift concurrency. Learn async/await, actors, structured concurrency, and Task management for iOS."
+          name="description">
+    <title>Swift Concurrency | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/05-concurrency.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="Swift Concurrency | iOS for Android Developers" property="og:title">
+    <meta content="From Kotlin coroutines to Swift concurrency. Learn async/await, actors, and structured concurrency."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/05-concurrency.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="Swift Concurrency | iOS for Android Developers" name="twitter:title">
+    <meta content="From Kotlin coroutines to Swift concurrency. Learn async/await and actors."
+          name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option selected value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 5</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">05</span>
+        <h1>Concurrency</h1>
+        <p class="module-description">From coroutines to Swift concurrency. Learn async/await, actors, and structured
+            concurrency the iOS way.</p>
+        <div class="estimated-time">Estimated time: 35 minutes</div>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Use async/await in Swift</li>
+            <li>Understand Tasks and structured concurrency</li>
+            <li>Work with actors for thread-safe state</li>
+            <li>Handle task cancellation and priorities</li>
+            <li>Map coroutine patterns to Swift concurrency</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Concurrency Concept Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Kotlin Coroutines</th>
+                    <th>Swift Concurrency</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>suspend fun</code></td>
+                    <td><code>async func</code></td>
+                    <td>Both mark functions that can suspend. Swift uses <code>async</code> keyword.</td>
+                </tr>
+                <tr>
+                    <td><code>launch { }</code></td>
+                    <td><code>Task { }</code></td>
+                    <td>Fire-and-forget concurrent work. Task is unstructured by default.</td>
+                </tr>
+                <tr>
+                    <td><code>async { }.await()</code></td>
+                    <td><code>async let</code></td>
+                    <td>Concurrent child task. Swift auto-awaits at use site.</td>
+                </tr>
+                <tr>
+                    <td><code>Dispatchers.Main</code></td>
+                    <td><code>@MainActor</code></td>
+                    <td>Swift uses actors instead of dispatchers. MainActor is a global actor.</td>
+                </tr>
+                <tr>
+                    <td><code>Dispatchers.IO</code></td>
+                    <td>Automatic</td>
+                    <td>Swift runtime automatically manages thread pool. No explicit IO dispatcher.</td>
+                </tr>
+                <tr>
+                    <td><code>withContext(Dispatchers.X)</code></td>
+                    <td>Actor isolation</td>
+                    <td>Swift switches context via actor boundaries, not explicit dispatchers.</td>
+                </tr>
+                <tr>
+                    <td><code>Mutex</code></td>
+                    <td><code>actor</code></td>
+                    <td>Actors provide built-in thread safety. No manual locking needed.</td>
+                </tr>
+                <tr>
+                    <td><code>Flow</code></td>
+                    <td><code>AsyncSequence</code></td>
+                    <td>Both are lazy async streams. AsyncSequence uses for-await-in.</td>
+                </tr>
+                <tr>
+                    <td><code>CoroutineScope</code></td>
+                    <td><code>TaskGroup</code></td>
+                    <td>Structured concurrency with automatic child cancellation.</td>
+                </tr>
+                <tr>
+                    <td><code>supervisorScope</code></td>
+                    <td><code>ThrowingTaskGroup</code></td>
+                    <td>Children can fail independently.</td>
+                </tr>
+                <tr>
+                    <td><code>Job.cancel()</code></td>
+                    <td><code>Task.cancel()</code></td>
+                    <td>Both support cooperative cancellation.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Async/Await Basics</h2>
+        <p>Swift's async/await is remarkably similar to Kotlin coroutines. If you understand <code>suspend</code>
+            functions, you already understand <code>async</code> functions. The main difference is syntax and how errors
+            are handled.</p>
+
+        <h3>Defining Async Functions</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Kotlin suspend function
+suspend fun fetchUser(id: String): User {
+    return api.getUser(id)
+}
+
+// With error handling
+suspend fun fetchUser(id: String): Result&lt;User&gt; {
+    return try {
+        Result.success(api.getUser(id))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Swift async function
+func fetchUser(id: String) async throws -> User {
+    return try await api.getUser(id: id)
+}
+
+// Errors are thrown, not wrapped
+// Call with: try await fetchUser(id: "123")
+// Or catch: do { try await... } catch { }</code></pre>
+            </div>
+        </div>
+
+        <h3>Calling Async Functions</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// From coroutine scope
+lifecycleScope.launch {
+    val user = fetchUser("123")
+    updateUI(user)
+}
+
+// From ViewModel
+viewModelScope.launch {
+    _uiState.update { it.copy(loading = true) }
+    val user = fetchUser("123")
+    _uiState.update { it.copy(user = user) }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// From SwiftUI view
+.task {
+    let user = try? await fetchUser(id: "123")
+    // Updates UI automatically (runs on MainActor)
+}
+
+// From ViewModel
+func loadUser() async {
+    isLoading = true
+    do {
+        user = try await fetchUser(id: "123")
+    } catch {
+        self.error = error.localizedDescription
+    }
+    isLoading = false
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Key Syntax Differences</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Kotlin</th>
+                    <th>Swift</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Declare async</td>
+                    <td><code>suspend fun</code></td>
+                    <td><code>func ... async</code></td>
+                </tr>
+                <tr>
+                    <td>Declare throws</td>
+                    <td>Not in signature</td>
+                    <td><code>func ... async throws</code></td>
+                </tr>
+                <tr>
+                    <td>Call async</td>
+                    <td>Direct call</td>
+                    <td><code>await funcName()</code></td>
+                </tr>
+                <tr>
+                    <td>Call throwing</td>
+                    <td>try-catch block</td>
+                    <td><code>try await funcName()</code></td>
+                </tr>
+                <tr>
+                    <td>Order</td>
+                    <td>N/A</td>
+                    <td><code>try</code> before <code>await</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Tasks and Structured Concurrency</h2>
+        <p>Swift Tasks are similar to Kotlin's coroutine builders (<code>launch</code>, <code>async</code>). The key
+            concept is <strong>structured concurrency</strong>: child tasks are automatically cancelled when their
+            parent is cancelled.</p>
+
+        <h3>Unstructured Tasks (Fire-and-Forget)</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Unstructured - lives beyond scope
+GlobalScope.launch {
+    doWork()
+}
+
+// Structured - tied to lifecycle
+lifecycleScope.launch {
+    doWork()
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Unstructured - must manage manually
+let task = Task {
+    await doWork()
+}
+// Later: task.cancel()
+
+// Structured in SwiftUI - auto-cancelled
+.task {
+    await doWork()
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Parallel Execution with async let</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Parallel execution with async
+coroutineScope {
+    val user = async { fetchUser() }
+    val posts = async { fetchPosts() }
+
+    // Both run concurrently
+    updateUI(user.await(), posts.await())
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Parallel execution with async let
+func loadData() async throws {
+    async let user = fetchUser()
+    async let posts = fetchPosts()
+
+    // Both run concurrently
+    // Await happens implicitly when used
+    try await updateUI(user, posts)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Task Groups (Dynamic Parallelism)</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Process list in parallel
+val results = ids.map { id ->
+    async { fetchItem(id) }
+}.awaitAll()</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Process list in parallel
+let results = try await withThrowingTaskGroup(
+    of: Item.self
+) { group in
+    for id in ids {
+        group.addTask {
+            try await fetchItem(id: id)
+        }
+    }
+
+    var items: [Item] = []
+    for try await item in group {
+        items.append(item)
+    }
+    return items
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>Swift's <code>async let</code> is cleaner than Kotlin's <code>async { }.await()</code> pattern
+                    because the await happens automatically when you use the value. However, <code>async let</code>
+                    requires knowing the number of parallel tasks at compile time. For dynamic parallelism (like
+                    processing a list), use <code>TaskGroup</code> which is similar to Kotlin's <code>awaitAll()</code>
+                    pattern.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Actors</h2>
+        <p>Actors are Swift's solution for thread-safe mutable state. They're similar to using <code>Mutex</code> in
+            Kotlin, but built into the language. An actor guarantees that only one task can access its mutable state at
+            a time.</p>
+
+        <h3>Basic Actor</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Thread-safe counter with Mutex
+class Counter {
+    private val mutex = Mutex()
+    private var count = 0
+
+    suspend fun increment() {
+        mutex.withLock {
+            count++
+        }
+    }
+
+    suspend fun getCount(): Int {
+        return mutex.withLock { count }
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Thread-safe counter with actor
+actor Counter {
+    private var count = 0
+
+    func increment() {
+        count += 1  // Automatically thread-safe
+    }
+
+    func getCount() -> Int {
+        count  // Automatically thread-safe
+    }
+}
+
+// Usage (requires await from outside)
+let counter = Counter()
+await counter.increment()
+let value = await counter.getCount()</code></pre>
+            </div>
+        </div>
+
+        <h3>Actor Isolation</h3>
+        <p>When you call an actor's method from outside, you must use <code>await</code> because the call might need to
+            wait for exclusive access:</p>
+        <pre><code class="language-swift">actor BankAccount {
+    private var balance: Decimal = 0
+
+    func deposit(amount: Decimal) {
+        balance += amount
+    }
+
+    func withdraw(amount: Decimal) -> Bool {
+        guard balance >= amount else { return false }
+        balance -= amount
+        return true
+    }
+
+    // nonisolated means this doesn't need await
+    nonisolated let accountNumber: String
+
+    init(accountNumber: String) {
+        self.accountNumber = accountNumber
+    }
+}
+
+// From outside the actor:
+let account = BankAccount(accountNumber: "12345")
+await account.deposit(amount: 100)  // Must await
+
+// But this doesn't need await (nonisolated)
+print(account.accountNumber)</code></pre>
+
+        <h3>Global Actors</h3>
+        <p>Swift has a built-in <code>@MainActor</code> global actor for UI work. You can also define custom global
+            actors:</p>
+        <pre><code class="language-swift">// MainActor - runs on main thread
+@MainActor
+class ViewModel: ObservableObject {
+    @Published var items: [Item] = []  // Always updated on main thread
+
+    func loadItems() async {
+        let fetched = await fetchItems()
+        items = fetched  // Safe - we're on MainActor
+    }
+}
+
+// Custom global actor
+@globalActor
+actor DatabaseActor {
+    static let shared = DatabaseActor()
+}
+
+@DatabaseActor
+func performDatabaseOperation() async {
+    // Always runs on database actor
+}</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Use <code>@MainActor</code> on your entire ViewModel class rather than individual methods. This
+                    ensures all @Published property updates happen on the main thread automatically, avoiding
+                    "Publishing changes from background threads" warnings.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>MainActor and UI Updates</h2>
+        <p><code>@MainActor</code> is Swift's equivalent to <code>Dispatchers.Main</code>. It ensures code runs on the
+            main thread for UI updates.</p>
+
+        <h3>Different Ways to Use MainActor</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Switch to main thread
+withContext(Dispatchers.Main) {
+    updateUI(data)
+}
+
+// Or from ViewModel
+viewModelScope.launch(Dispatchers.Main) {
+    _uiState.value = newState
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Method 1: Annotate function
+@MainActor
+func updateUI(data: Data) {
+    label.text = data.title
+}
+
+// Method 2: Inline switch
+await MainActor.run {
+    self.items = newItems
+}
+
+// Method 3: Annotate class
+@MainActor
+class ViewModel: ObservableObject {
+    // All methods run on main thread
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>SwiftUI's .task Modifier</h3>
+        <p>SwiftUI's <code>.task</code> modifier is MainActor-isolated by default, making it safe for UI updates:</p>
+        <pre><code class="language-swift">struct UserView: View {
+    @State private var user: User?
+
+    var body: some View {
+        VStack {
+            if let user = user {
+                Text(user.name)
+            }
+        }
+        .task {
+            // This runs on MainActor automatically
+            user = try? await fetchUser()
+            // Safe to update @State here
+        }
+    }
+}</code></pre>
+
+        <h3>Common Pitfalls</h3>
+        <ul class="pitfalls-list">
+            <li><strong>Updating @Published from background</strong>: Always use @MainActor on ViewModels or switch
+                explicitly.
+            </li>
+            <li><strong>Blocking the main thread</strong>: Don't do heavy computation on MainActor. Offload to a Task or
+                actor.
+            </li>
+            <li><strong>Mixing sync and async</strong>: If a MainActor function calls a non-isolated async function, the
+                return might not be on MainActor.
+            </li>
+        </ul>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p>Unlike Kotlin where you explicitly switch dispatchers, Swift's actor isolation can be surprising.
+                    When an <code>@MainActor</code> function calls <code>await someAsyncFunction()</code>, the async
+                    function runs elsewhere, and when it returns you're back on MainActor. But if you're NOT in a
+                    MainActor context and need to update UI, you must explicitly use <code>await MainActor.run {
+                        }</code>.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>AsyncSequence</h2>
+        <p><code>AsyncSequence</code> is Swift's equivalent to Kotlin <code>Flow</code>. It's a sequence that produces
+            values asynchronously over time.</p>
+
+        <h3>Consuming AsyncSequence</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Collecting a Flow
+viewModelScope.launch {
+    repository.getUpdates()
+        .collect { update ->
+            handleUpdate(update)
+        }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Consuming AsyncSequence
+Task {
+    for await update in repository.getUpdates() {
+        handleUpdate(update)
+    }
+}
+
+// Or in SwiftUI
+.task {
+    for await update in repository.getUpdates() {
+        self.latestUpdate = update
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Built-in AsyncSequences</h3>
+        <pre><code class="language-swift">// NotificationCenter as AsyncSequence
+for await notification in NotificationCenter.default.notifications(named: .userDidLogin) {
+    handleLogin(notification)
+}
+
+// URL bytes as AsyncSequence
+let (bytes, response) = try await URLSession.shared.bytes(from: url)
+for try await byte in bytes {
+    process(byte)
+}
+
+// Timer as AsyncSequence (iOS 16+)
+for await _ in Timer.publish(every: 1, on: .main, in: .common).values {
+    tick()
+}</code></pre>
+
+        <h3>Creating Custom AsyncSequence</h3>
+        <pre><code class="language-swift">// Using AsyncStream (similar to callbackFlow in Kotlin)
+func locationUpdates() -> AsyncStream&lt;CLLocation&gt; {
+    AsyncStream { continuation in
+        let delegate = LocationDelegate { location in
+            continuation.yield(location)
+        }
+
+        continuation.onTermination = { _ in
+            delegate.stopUpdates()
+        }
+
+        delegate.startUpdates()
+    }
+}
+
+// Usage
+for await location in locationUpdates() {
+    updateMap(location)
+}</code></pre>
+
+        <h3>AsyncSequence Operators</h3>
+        <pre><code class="language-swift">// Similar to Flow operators
+for await value in stream
+    .map { $0.transformed }
+    .filter { $0.isValid }
+    .prefix(10) {  // Take first 10
+    process(value)
+}</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>Task Cancellation</h2>
+        <p>Swift uses cooperative cancellation, just like Kotlin coroutines. Tasks must check for cancellation and
+            respond appropriately.</p>
+
+        <h3>Checking Cancellation</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">suspend fun processItems(items: List&lt;Item&gt;) {
+    for (item in items) {
+        ensureActive()  // Throws if cancelled
+        process(item)
+    }
+}
+
+// Or check manually
+if (isActive) {
+    continueWork()
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">func processItems(_ items: [Item]) async throws {
+    for item in items {
+        try Task.checkCancellation()  // Throws if cancelled
+        await process(item)
+    }
+}
+
+// Or check manually
+if !Task.isCancelled {
+    await continueWork()
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Cancelling Tasks</h3>
+        <pre><code class="language-swift">// Store task reference
+var downloadTask: Task&lt;Data, Error&gt;?
+
+func startDownload() {
+    downloadTask = Task {
+        try await downloadLargeFile()
+    }
+}
+
+func cancelDownload() {
+    downloadTask?.cancel()
+}
+
+// In SwiftUI, .task auto-cancels when view disappears
+struct DownloadView: View {
+    var body: some View {
+        Text("Downloading...")
+            .task {
+                // Automatically cancelled when view disappears
+                await downloadFile()
+            }
+    }
+}</code></pre>
+
+        <h3>Handling Cancellation Gracefully</h3>
+        <pre><code class="language-swift">func fetchWithCleanup() async throws -> Data {
+    let tempFile = createTempFile()
+
+    do {
+        let data = try await download()
+        return data
+    } catch is CancellationError {
+        // Clean up on cancellation
+        deleteTempFile(tempFile)
+        throw CancellationError()
+    }
+}
+
+// Or using withTaskCancellationHandler
+func fetchWithHandler() async throws -> Data {
+    try await withTaskCancellationHandler {
+        try await download()
+    } onCancel: {
+        // Called immediately when cancelled
+        // Note: runs on different thread
+        cleanup()
+    }
+}</code></pre>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Use async/await</li>
+            <li>Create and manage Tasks</li>
+            <li>Implement actors</li>
+            <li>Handle MainActor correctly</li>
+            <li>Use AsyncSequence</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build an image gallery app that fetches images concurrently and displays them as they load.</p>
+        <ol>
+            <li><strong>Create Image Loader Actor</strong>: Build an <code>actor ImageLoader</code> with a cache
+                dictionary. Implement <code>func loadImage(url: URL) async throws -> UIImage</code> that caches results.
+            </li>
+            <li><strong>Parallel Fetching</strong>: Create a function that takes an array of URLs and fetches all images
+                in parallel using <code>TaskGroup</code>. Return them as they complete (not all at once).
+            </li>
+            <li><strong>Build the Gallery View</strong>: Create a SwiftUI view with a grid of images. Use
+                <code>.task</code> to trigger loading. Display a placeholder while loading.
+            </li>
+            <li><strong>Add Cancellation</strong>: Store the Task and cancel it when the view disappears. Verify
+                cancellation works by checking <code>Task.isCancelled</code> in your loader.
+            </li>
+            <li><strong>Progress Indicator</strong>: Add a progress bar showing how many images have loaded out of the
+                total.
+            </li>
+            <li><strong>Bonus</strong>: Use <code>AsyncStream</code> to emit images as they load, allowing the UI to
+                update progressively.
+            </li>
+        </ol>
+        <div class="callout tip">
+            <div class="callout-title">Exercise Tip</div>
+            <div class="callout-content">
+                <p>Start with a simple single-image loader before adding parallelism. Use <code>URLSession.shared.data(from:)</code>
+                    for fetching and <code>UIImage(data:)</code> for decoding.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Swift Syntax</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Async function</td>
+                    <td><code>func foo() async throws -> T</code></td>
+                </tr>
+                <tr>
+                    <td>Call async</td>
+                    <td><code>try await foo()</code></td>
+                </tr>
+                <tr>
+                    <td>Fire and forget</td>
+                    <td><code>Task { ... }</code></td>
+                </tr>
+                <tr>
+                    <td>Parallel execution</td>
+                    <td><code>async let a = ...; async let b = ...</code></td>
+                </tr>
+                <tr>
+                    <td>Main thread</td>
+                    <td><code>@MainActor</code></td>
+                </tr>
+                <tr>
+                    <td>Thread-safe class</td>
+                    <td><code>actor MyActor { }</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References and Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/swift/concurrency" rel="noopener" target="_blank">Swift
+                Concurrency Documentation</a> - Official async/await and actors reference
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2021/10132/" rel="noopener" target="_blank">WWDC21:
+                Meet async/await in Swift</a> - Introduction to Swift concurrency
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2021/10133/" rel="noopener" target="_blank">WWDC21:
+                Explore structured concurrency</a> - Tasks and task groups deep dive
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2021/10134/" rel="noopener" target="_blank">WWDC21:
+                Protect mutable state with actors</a> - Actor isolation explained
+            </li>
+            <li><a href="https://github.com/apple/swift-async-algorithms" rel="noopener" target="_blank">Swift Async
+                Algorithms</a> - Additional AsyncSequence operators from Apple
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="04-architecture-state.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">Architecture & State</span></a>
+        <a class="module-nav-link next" href="06-networking.html"><span class="module-nav-label">Next</span><span
+                class="module-nav-title">Networking</span></a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="iOS testing with XCTest for Android developers familiar with JUnit and Espresso. Learn unit testing, UI testing, and snapshot testing."
+          name="description">
+    <title>iOS Testing | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/09-testing.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="iOS Testing | iOS for Android Developers" property="og:title">
+    <meta content="iOS testing with XCTest for JUnit and Espresso developers." property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/09-testing.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="iOS Testing | iOS for Android Developers" name="twitter:title">
+    <meta content="iOS testing with XCTest for JUnit and Espresso developers." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option selected value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 9</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">09</span>
+        <h1>Testing</h1>
+        <p class="module-description">XCTest, UI testing, and snapshot testing. Map your JUnit, Espresso, and Mockito
+            knowledge.</p>
+        <p class="module-time"><strong>Estimated Time:</strong> 30 minutes</p>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Write unit tests with XCTest</li>
+            <li>Create UI tests with XCUITest</li>
+            <li>Mock dependencies for testing</li>
+            <li>Test async code</li>
+            <li>Implement snapshot testing</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Testing Framework Mapping</h2>
+        <p>If you're coming from Android, you'll find iOS testing concepts familiar but with different APIs. Here's how
+            your existing knowledge maps to iOS:</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>JUnit</code></td>
+                    <td><code>XCTest</code></td>
+                    <td>Apple's built-in testing framework. Integrated into Xcode with test navigator and code
+                        coverage.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Espresso</code></td>
+                    <td><code>XCUITest</code></td>
+                    <td>UI testing framework that runs in a separate process. Uses accessibility identifiers like
+                        Espresso uses resource IDs.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>Mockito</code> / <code>MockK</code></td>
+                    <td>Protocol mocks / Swift Macros</td>
+                    <td>No built-in mocking framework. Use protocol-based manual mocks or third-party libraries like
+                        Mockingbird.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>@Test</code></td>
+                    <td><code>func test...()</code> / <code>@Test</code></td>
+                    <td>XCTest uses naming convention (prefix "test"). Swift Testing uses <code>@Test</code> macro.</td>
+                </tr>
+                <tr>
+                    <td><code>@Before</code> / <code>@After</code></td>
+                    <td><code>setUp()</code> / <code>tearDown()</code></td>
+                    <td>Instance methods called before/after each test. Also have class-level variants.</td>
+                </tr>
+                <tr>
+                    <td><code>assertEquals</code></td>
+                    <td><code>XCTAssertEqual</code> / <code>#expect</code></td>
+                    <td>XCTest uses <code>XCTAssert*</code> functions. Swift Testing uses <code>#expect</code> macro.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>XCTest Basics</h2>
+        <p>XCTest is Apple's native testing framework, equivalent to JUnit on Android. Test classes inherit from <code>XCTestCase</code>,
+            and test methods must start with the word "test". Unlike JUnit's annotation-based approach, XCTest uses
+            naming conventions and inheritance.</p>
+
+        <h3>Test Lifecycle</h3>
+        <p>XCTest provides lifecycle methods similar to JUnit's <code>@Before</code> and <code>@After</code>:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Android (JUnit)</span></div>
+                <pre><code>class UserRepositoryTest {
+    private lateinit var repository: UserRepository
+    private lateinit var mockApi: MockUserApi
+
+    @Before
+    fun setUp() {
+        mockApi = MockUserApi()
+        repository = UserRepository(mockApi)
+    }
+
+    @After
+    fun tearDown() {
+        // Clean up resources
+        mockApi.reset()
+    }
+
+    @Test
+    fun `test fetch user returns user`() {
+        // Arrange
+        mockApi.setResponse(User("John", 25))
+
+        // Act
+        val result = repository.fetchUser("123")
+
+        // Assert
+        assertEquals("John", result.name)
+        assertEquals(25, result.age)
+    }
+
+    @Test
+    fun `test fetch user throws on error`() {
+        mockApi.setError(IOException("Network error"))
+
+        assertThrows&lt;IOException&gt; {
+            repository.fetchUser("123")
+        }
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">iOS (XCTest)</span></div>
+                <pre><code>class UserRepositoryTests: XCTestCase {
+    private var repository: UserRepository!
+    private var mockApi: MockUserApi!
+
+    override func setUp() {
+        super.setUp()
+        mockApi = MockUserApi()
+        repository = UserRepository(api: mockApi)
+    }
+
+    override func tearDown() {
+        // Clean up resources
+        mockApi = nil
+        repository = nil
+        super.tearDown()
+    }
+
+    func testFetchUserReturnsUser() {
+        // Arrange
+        mockApi.setResponse(User(name: "John", age: 25))
+
+        // Act
+        let result = repository.fetchUser(id: "123")
+
+        // Assert
+        XCTAssertEqual("John", result.name)
+        XCTAssertEqual(25, result.age)
+    }
+
+    func testFetchUserThrowsOnError() {
+        mockApi.setError(NetworkError.connectionFailed)
+
+        XCTAssertThrowsError(try repository.fetchUser(id: "123")) { error in
+            XCTAssertTrue(error is NetworkError)
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Common XCTest Assertions</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>JUnit/Kotlin</th>
+                    <th>XCTest</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>assertEquals(a, b)</code></td>
+                    <td><code>XCTAssertEqual(a, b)</code></td>
+                    <td>Values are equal</td>
+                </tr>
+                <tr>
+                    <td><code>assertNotEquals(a, b)</code></td>
+                    <td><code>XCTAssertNotEqual(a, b)</code></td>
+                    <td>Values are not equal</td>
+                </tr>
+                <tr>
+                    <td><code>assertTrue(x)</code></td>
+                    <td><code>XCTAssertTrue(x)</code></td>
+                    <td>Expression is true</td>
+                </tr>
+                <tr>
+                    <td><code>assertFalse(x)</code></td>
+                    <td><code>XCTAssertFalse(x)</code></td>
+                    <td>Expression is false</td>
+                </tr>
+                <tr>
+                    <td><code>assertNull(x)</code></td>
+                    <td><code>XCTAssertNil(x)</code></td>
+                    <td>Value is null/nil</td>
+                </tr>
+                <tr>
+                    <td><code>assertNotNull(x)</code></td>
+                    <td><code>XCTAssertNotNil(x)</code></td>
+                    <td>Value is not null/nil</td>
+                </tr>
+                <tr>
+                    <td><code>assertThrows&lt;T&gt; { }</code></td>
+                    <td><code>XCTAssertThrowsError(try expr)</code></td>
+                    <td>Expression throws</td>
+                </tr>
+                <tr>
+                    <td><code>assertSame(a, b)</code></td>
+                    <td><code>XCTAssertIdentical(a, b)</code></td>
+                    <td>Same object reference</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Test Organization</h3>
+        <p>In Xcode, tests are organized in a separate target. Create a test target when setting up your project, or add
+            one via File > New > Target > Unit Testing Bundle.</p>
+        <pre><code>// File structure
+MyApp/
+├── MyApp/                    // Main target
+│   ├── Models/
+│   ├── ViewModels/
+│   └── Views/
+├── MyAppTests/               // Unit test target
+│   ├── ModelTests/
+│   └── ViewModelTests/
+└── MyAppUITests/             // UI test target
+    └── ScreenTests/</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>Swift Testing (New in Swift 6)</h2>
+        <p>Swift Testing is Apple's modern testing framework introduced with Swift 6 in 2024. It uses Swift macros for a
+            more expressive, Swift-native syntax. If you've used Kotlin's modern testing libraries, you'll appreciate
+            the improvements over XCTest.</p>
+
+        <h3>Key Differences from XCTest</h3>
+        <ul>
+            <li><strong>@Test macro</strong> - No more "test" prefix naming convention</li>
+            <li><strong>#expect macro</strong> - More expressive assertions with better failure messages</li>
+            <li><strong>Parameterized tests</strong> - Built-in support for testing with multiple inputs</li>
+            <li><strong>Tags and traits</strong> - Organize and filter tests with metadata</li>
+            <li><strong>Parallel execution</strong> - Tests run in parallel by default</li>
+        </ul>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">XCTest (Traditional)</span></div>
+                <pre><code>import XCTest
+
+class CalculatorTests: XCTestCase {
+    func testAddition() {
+        let calculator = Calculator()
+        let result = calculator.add(2, 3)
+        XCTAssertEqual(result, 5)
+    }
+
+    func testDivisionByZero() {
+        let calculator = Calculator()
+        XCTAssertThrowsError(
+            try calculator.divide(10, by: 0)
+        ) { error in
+            XCTAssertEqual(
+                error as? CalculatorError,
+                .divisionByZero
+            )
+        }
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Testing (Modern)</span></div>
+                <pre><code>import Testing
+
+struct CalculatorTests {
+    @Test func addition() {
+        let calculator = Calculator()
+        let result = calculator.add(2, 3)
+        #expect(result == 5)
+    }
+
+    @Test func divisionByZero() throws {
+        let calculator = Calculator()
+        #expect(throws: CalculatorError.divisionByZero) {
+            try calculator.divide(10, by: 0)
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Parameterized Tests</h3>
+        <p>Swift Testing makes parameterized tests a first-class feature, similar to JUnit 5's
+            <code>@ParameterizedTest</code>:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">JUnit 5 Parameterized</span></div>
+                <pre><code>@ParameterizedTest
+@CsvSource(value = [
+    "1, 1, 2",
+    "2, 3, 5",
+    "10, 20, 30"
+])
+fun `test addition`(a: Int, b: Int, expected: Int) {
+    assertEquals(expected, calculator.add(a, b))
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Testing Parameterized</span></div>
+                <pre><code>@Test(arguments: [
+    (1, 1, 2),
+    (2, 3, 5),
+    (10, 20, 30)
+])
+func addition(a: Int, b: Int, expected: Int) {
+    #expect(calculator.add(a, b) == expected)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Test Organization with Suites and Tags</h3>
+        <pre><code>import Testing
+
+// Group related tests in a struct (like a test suite)
+@Suite("User Authentication Tests")
+struct AuthenticationTests {
+
+    @Test("Valid credentials should authenticate")
+    @Tag(.critical)
+    func validLogin() async throws {
+        let auth = AuthService()
+        let result = try await auth.login(email: "test@example.com", password: "password123")
+        #expect(result.isSuccess)
+    }
+
+    @Test("Invalid password should fail")
+    @Tag(.critical)
+    func invalidPassword() async throws {
+        let auth = AuthService()
+        await #expect(throws: AuthError.invalidCredentials) {
+            try await auth.login(email: "test@example.com", password: "wrong")
+        }
+    }
+}
+
+// Define custom tags
+extension Tag {
+    @Tag static var critical: Self
+    @Tag static var slow: Self
+}</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Swift Testing and XCTest can coexist in the same project. Start using Swift Testing for new tests
+                    while gradually migrating existing XCTest tests. Swift Testing's <code>#expect</code> macro provides
+                    better failure messages by capturing the actual expression that failed, making debugging easier.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>UI Testing with XCUITest</h2>
+        <p>XCUITest is Apple's UI testing framework, equivalent to Espresso on Android. Like Espresso, it interacts with
+            UI elements and verifies their state, but it runs in a separate process from your app. This provides better
+            isolation but means tests are slower than Espresso tests.</p>
+
+        <h3>Core Concepts Comparison</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Espresso</th>
+                    <th>XCUITest</th>
+                    <th>Purpose</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>onView(withId(R.id.button))</code></td>
+                    <td><code>app.buttons["submitButton"]</code></td>
+                    <td>Find element by identifier</td>
+                </tr>
+                <tr>
+                    <td><code>onView(withText("Submit"))</code></td>
+                    <td><code>app.buttons["Submit"]</code></td>
+                    <td>Find element by text/label</td>
+                </tr>
+                <tr>
+                    <td><code>.perform(click())</code></td>
+                    <td><code>.tap()</code></td>
+                    <td>Tap/click action</td>
+                </tr>
+                <tr>
+                    <td><code>.perform(typeText("hello"))</code></td>
+                    <td><code>.typeText("hello")</code></td>
+                    <td>Enter text</td>
+                </tr>
+                <tr>
+                    <td><code>.check(matches(isDisplayed()))</code></td>
+                    <td><code>XCTAssertTrue(element.exists)</code></td>
+                    <td>Verify visibility</td>
+                </tr>
+                <tr>
+                    <td><code>IdlingResource</code></td>
+                    <td><code>waitForExistence(timeout:)</code></td>
+                    <td>Wait for async operations</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Espresso</span></div>
+                <pre><code>@RunWith(AndroidJUnit4::class)
+class LoginScreenTest {
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(
+        LoginActivity::class.java
+    )
+
+    @Test
+    fun testSuccessfulLogin() {
+        // Enter email
+        onView(withId(R.id.emailInput))
+            .perform(typeText("user@example.com"))
+
+        // Enter password
+        onView(withId(R.id.passwordInput))
+            .perform(typeText("password123"))
+
+        // Click login button
+        onView(withId(R.id.loginButton))
+            .perform(click())
+
+        // Verify navigation to home screen
+        onView(withId(R.id.welcomeText))
+            .check(matches(isDisplayed()))
+            .check(matches(withText("Welcome!")))
+    }
+
+    @Test
+    fun testEmptyEmailShowsError() {
+        onView(withId(R.id.loginButton))
+            .perform(click())
+
+        onView(withId(R.id.emailError))
+            .check(matches(isDisplayed()))
+            .check(matches(withText("Email required")))
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">XCUITest</span></div>
+                <pre><code>class LoginScreenTests: XCTestCase {
+
+    var app: XCUIApplication!
+
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launch()
+    }
+
+    func testSuccessfulLogin() {
+        // Enter email
+        let emailField = app.textFields["emailInput"]
+        emailField.tap()
+        emailField.typeText("user@example.com")
+
+        // Enter password
+        let passwordField = app.secureTextFields["passwordInput"]
+        passwordField.tap()
+        passwordField.typeText("password123")
+
+        // Tap login button
+        app.buttons["loginButton"].tap()
+
+        // Verify navigation to home screen
+        let welcomeText = app.staticTexts["Welcome!"]
+        XCTAssertTrue(welcomeText.waitForExistence(timeout: 5))
+    }
+
+    func testEmptyEmailShowsError() {
+        app.buttons["loginButton"].tap()
+
+        let errorLabel = app.staticTexts["Email required"]
+        XCTAssertTrue(errorLabel.exists)
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Setting Up Accessibility Identifiers</h3>
+        <p>Like Espresso uses resource IDs, XCUITest uses accessibility identifiers to find elements. Set them in your
+            SwiftUI or UIKit code:</p>
+
+        <pre><code>// SwiftUI
+TextField("Email", text: $email)
+    .accessibilityIdentifier("emailInput")
+
+Button("Login") { login() }
+    .accessibilityIdentifier("loginButton")
+
+// UIKit
+emailTextField.accessibilityIdentifier = "emailInput"
+loginButton.accessibilityIdentifier = "loginButton"</code></pre>
+
+        <h3>Page Object Pattern</h3>
+        <p>Just like in Espresso testing, use the Page Object pattern to create maintainable UI tests:</p>
+
+        <pre><code>// Page Object
+class LoginScreen {
+    private let app: XCUIApplication
+
+    init(app: XCUIApplication) {
+        self.app = app
+    }
+
+    var emailField: XCUIElement {
+        app.textFields["emailInput"]
+    }
+
+    var passwordField: XCUIElement {
+        app.secureTextFields["passwordInput"]
+    }
+
+    var loginButton: XCUIElement {
+        app.buttons["loginButton"]
+    }
+
+    func login(email: String, password: String) -> HomeScreen {
+        emailField.tap()
+        emailField.typeText(email)
+        passwordField.tap()
+        passwordField.typeText(password)
+        loginButton.tap()
+        return HomeScreen(app: app)
+    }
+}
+
+// Usage in test
+func testSuccessfulLogin() {
+    let loginScreen = LoginScreen(app: app)
+    let homeScreen = loginScreen.login(
+        email: "user@example.com",
+        password: "password123"
+    )
+    XCTAssertTrue(homeScreen.welcomeLabel.exists)
+}</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android vs iOS</div>
+            <div class="callout-content">
+                <p><strong>Key Differences:</strong></p>
+                <ul>
+                    <li><strong>Process isolation:</strong> XCUITest runs in a separate process, while Espresso runs
+                        in-process. This makes XCUITest more stable but slower.
+                    </li>
+                    <li><strong>Synchronization:</strong> Espresso auto-syncs with the main thread; XCUITest needs
+                        explicit <code>waitForExistence(timeout:)</code> calls for async operations.
+                    </li>
+                    <li><strong>Element queries:</strong> Espresso uses matchers like <code>withId()</code> and <code>withText()</code>;
+                        XCUITest uses element type subscripts like <code>app.buttons["id"]</code>.
+                    </li>
+                    <li><strong>Launch arguments:</strong> Both support launch arguments for configuring test scenarios,
+                        but XCUITest also supports environment variables for deeper configuration.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Mocking & Test Doubles</h2>
+        <p>Unlike Android where Mockito or MockK provide powerful runtime mocking, iOS relies primarily on <strong>protocol-based
+            manual mocks</strong>. Swift's lack of runtime reflection capabilities (which Mockito uses) means you'll
+            write mock implementations yourself or use code generation tools.</p>
+
+        <h3>Protocol-Based Mocking</h3>
+        <p>The pattern is straightforward: define dependencies as protocols, then create mock implementations for
+            testing.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Mockito/MockK</span></div>
+                <pre><code>// Production code
+class UserRepository(
+    private val api: UserApi
+) {
+    suspend fun getUser(id: String): User {
+        return api.fetchUser(id)
+    }
+}
+
+// Test with Mockito
+class UserRepositoryTest {
+    @Mock
+    lateinit var mockApi: UserApi
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.openMocks(this)
+    }
+
+    @Test
+    fun `getUser returns user from api`() = runTest {
+        // Arrange - one-liner mock setup
+        whenever(mockApi.fetchUser("123"))
+            .thenReturn(User("John", 25))
+
+        val repo = UserRepository(mockApi)
+
+        // Act
+        val user = repo.getUser("123")
+
+        // Assert
+        assertEquals("John", user.name)
+        verify(mockApi).fetchUser("123")
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Protocol Mocking</span></div>
+                <pre><code>// 1. Define protocol for dependency
+protocol UserAPIProtocol {
+    func fetchUser(id: String) async throws -> User
+}
+
+// 2. Production implementation
+class UserAPI: UserAPIProtocol {
+    func fetchUser(id: String) async throws -> User {
+        // Real network call
+    }
+}
+
+// 3. Mock implementation for tests
+class MockUserAPI: UserAPIProtocol {
+    var stubbedUser: User?
+    var stubbedError: Error?
+    var fetchUserCallCount = 0
+    var lastFetchedId: String?
+
+    func fetchUser(id: String) async throws -> User {
+        fetchUserCallCount += 1
+        lastFetchedId = id
+
+        if let error = stubbedError {
+            throw error
+        }
+        return stubbedUser!
+    }
+}
+
+// 4. Use in tests
+class UserRepositoryTests: XCTestCase {
+    func testGetUserReturnsUserFromAPI() async throws {
+        // Arrange
+        let mockAPI = MockUserAPI()
+        mockAPI.stubbedUser = User(name: "John", age: 25)
+        let repo = UserRepository(api: mockAPI)
+
+        // Act
+        let user = try await repo.getUser(id: "123")
+
+        // Assert
+        XCTAssertEqual("John", user.name)
+        XCTAssertEqual(1, mockAPI.fetchUserCallCount)
+        XCTAssertEqual("123", mockAPI.lastFetchedId)
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Generic Spy/Mock Pattern</h3>
+        <p>Create reusable test doubles that track calls and allow stubbing:</p>
+
+        <pre><code>// Spy pattern for tracking method calls
+class MockNetworkClient: NetworkClientProtocol {
+    // Track all calls for verification
+    private(set) var requests: [URLRequest] = []
+
+    // Stubbed responses by URL
+    var stubbedResponses: [String: Result&lt;Data, Error&gt;] = [:]
+
+    func send(_ request: URLRequest) async throws -> Data {
+        requests.append(request)
+
+        guard let url = request.url?.absoluteString,
+              let result = stubbedResponses[url] else {
+            throw NetworkError.notFound
+        }
+
+        switch result {
+        case .success(let data):
+            return data
+        case .failure(let error):
+            throw error
+        }
+    }
+
+    // Verification helpers
+    func verify(requestMade url: String, times: Int = 1) -> Bool {
+        let count = requests.filter { $0.url?.absoluteString == url }.count
+        return count == times
+    }
+
+    func verifyNoRequests() -> Bool {
+        requests.isEmpty
+    }
+}</code></pre>
+
+        <h3>Third-Party Mocking Libraries</h3>
+        <p>For larger projects, consider these libraries that generate mocks:</p>
+        <ul>
+            <li><strong><a href="https://github.com/birdrides/mockingbird">Mockingbird</a></strong> - Code
+                generation-based mocking framework with syntax similar to Mockito
+            </li>
+            <li><strong><a href="https://github.com/Brightify/Cuckoo">Cuckoo</a></strong> - Another code generation
+                approach for Swift mocking
+            </li>
+            <li><strong><a href="https://github.com/pointfreeco/swift-dependencies">swift-dependencies</a></strong> -
+                Dependency injection approach that makes testing easier
+            </li>
+        </ul>
+
+        <pre><code>// Example with Mockingbird (after code generation)
+func testWithMockingbird() async throws {
+    let mockAPI = mock(UserAPIProtocol.self)
+
+    given(mockAPI.fetchUser(id: any()))
+        .willReturn(User(name: "John", age: 25))
+
+    let repo = UserRepository(api: mockAPI)
+    let user = try await repo.getUser(id: "123")
+
+    verify(mockAPI.fetchUser(id: "123")).wasCalled(exactly(1))
+}</code></pre>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p><strong>Don't expect Mockito-like magic in Swift.</strong> Mockito works through runtime bytecode
+                    manipulation which isn't possible in Swift. Accept that you'll write more boilerplate for mocks, but
+                    the benefit is that your mocks are type-safe and compiler-verified. If a protocol method signature
+                    changes, your mock won't compile until you update it.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Testing Async Code</h2>
+        <p>Both Kotlin coroutines and Swift async/await need special handling in tests. In Swift, modern async testing
+            is straightforward since XCTest and Swift Testing both support async test methods natively.</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin Coroutines Testing</span></div>
+                <pre><code>class UserViewModelTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `loadUser updates state correctly`() = runTest {
+        // Arrange
+        val mockRepo = MockUserRepository()
+        mockRepo.stubbedUser = User("John", 25)
+        val viewModel = UserViewModel(mockRepo)
+
+        // Act
+        viewModel.loadUser("123")
+        advanceUntilIdle()
+
+        // Assert
+        assertEquals(
+            UserState.Loaded(User("John", 25)),
+            viewModel.state.value
+        )
+    }
+
+    @Test
+    fun `loadUser handles error`() = runTest {
+        val mockRepo = MockUserRepository()
+        mockRepo.error = IOException("Network error")
+        val viewModel = UserViewModel(mockRepo)
+
+        viewModel.loadUser("123")
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value is UserState.Error)
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Async Testing</span></div>
+                <pre><code>class UserViewModelTests: XCTestCase {
+
+    // Async test - just add 'async'
+    func testLoadUserUpdatesStateCorrectly() async {
+        // Arrange
+        let mockRepo = MockUserRepository()
+        mockRepo.stubbedUser = User(name: "John", age: 25)
+        let viewModel = UserViewModel(repository: mockRepo)
+
+        // Act
+        await viewModel.loadUser(id: "123")
+
+        // Assert
+        XCTAssertEqual(
+            viewModel.state,
+            .loaded(User(name: "John", age: 25))
+        )
+    }
+
+    func testLoadUserHandlesError() async {
+        let mockRepo = MockUserRepository()
+        mockRepo.error = NetworkError.connectionFailed
+        let viewModel = UserViewModel(repository: mockRepo)
+
+        await viewModel.loadUser(id: "123")
+
+        if case .error = viewModel.state {
+            // Success - state is error
+        } else {
+            XCTFail("Expected error state")
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Testing with Expectations (Callback-based APIs)</h3>
+        <p>For older callback-based APIs or when testing publishers, use XCTest expectations (similar to CountDownLatch
+            in Android):</p>
+
+        <pre><code>class LegacyAPITests: XCTestCase {
+
+    func testCallbackBasedAPI() {
+        // Create expectation
+        let expectation = expectation(description: "API call completes")
+        var receivedUser: User?
+
+        // Call async API with callback
+        let api = UserAPI()
+        api.fetchUser(id: "123") { result in
+            switch result {
+            case .success(let user):
+                receivedUser = user
+            case .failure:
+                XCTFail("Expected success")
+            }
+            expectation.fulfill()
+        }
+
+        // Wait for expectation (timeout after 5 seconds)
+        wait(for: [expectation], timeout: 5.0)
+
+        // Assert
+        XCTAssertEqual("John", receivedUser?.name)
+    }
+
+    func testMultipleAsyncOperations() {
+        let expectation1 = expectation(description: "First call")
+        let expectation2 = expectation(description: "Second call")
+
+        api.fetchUser(id: "1") { _ in expectation1.fulfill() }
+        api.fetchUser(id: "2") { _ in expectation2.fulfill() }
+
+        // Wait for all expectations
+        wait(for: [expectation1, expectation2], timeout: 5.0)
+    }
+}</code></pre>
+
+        <h3>Testing Combine Publishers</h3>
+        <pre><code>import Combine
+
+class PublisherTests: XCTestCase {
+    var cancellables = Set&lt;AnyCancellable&gt;()
+
+    func testPublisherEmitsValues() {
+        let expectation = expectation(description: "Publisher completes")
+        var receivedValues: [Int] = []
+
+        let publisher = [1, 2, 3].publisher
+
+        publisher
+            .sink(
+                receiveCompletion: { _ in expectation.fulfill() },
+                receiveValue: { receivedValues.append($0) }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 1.0)
+
+        XCTAssertEqual([1, 2, 3], receivedValues)
+    }
+}
+
+// Swift Testing version
+@Test func publisherEmitsValues() async {
+    var receivedValues: [Int] = []
+    let publisher = [1, 2, 3].publisher
+
+    for await value in publisher.values {
+        receivedValues.append(value)
+    }
+
+    #expect(receivedValues == [1, 2, 3])
+}</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>Snapshot Testing</h2>
+        <p>Snapshot testing captures a "snapshot" of your UI and compares it against a reference image. This catches
+            unintended visual regressions. While Android has libraries like Shot or Paparazzi, iOS uses the popular
+            <strong>swift-snapshot-testing</strong> library from Point-Free.</p>
+
+        <h3>Setting Up swift-snapshot-testing</h3>
+        <p>Add the dependency via Swift Package Manager:</p>
+        <pre><code>// Package.swift or add via Xcode
+dependencies: [
+    .package(
+        url: "https://github.com/pointfreeco/swift-snapshot-testing",
+        from: "1.15.0"
+    )
+]</code></pre>
+
+        <h3>Basic Snapshot Tests</h3>
+        <pre><code>import SnapshotTesting
+import XCTest
+@testable import MyApp
+
+class ProfileViewSnapshotTests: XCTestCase {
+
+    func testProfileView() {
+        let view = ProfileView(
+            user: User(name: "John Doe", avatar: nil)
+        )
+
+        // Snapshot the SwiftUI view
+        assertSnapshot(of: view, as: .image(layout: .device(config: .iPhone13)))
+    }
+
+    func testProfileViewWithAvatar() {
+        let view = ProfileView(
+            user: User(name: "Jane Doe", avatar: UIImage(named: "avatar"))
+        )
+
+        assertSnapshot(of: view, as: .image(layout: .device(config: .iPhone13)))
+    }
+
+    // Test multiple device sizes
+    func testProfileViewResponsive() {
+        let view = ProfileView(user: User(name: "John", avatar: nil))
+
+        assertSnapshot(of: view, as: .image(layout: .device(config: .iPhoneSe)))
+        assertSnapshot(of: view, as: .image(layout: .device(config: .iPhone13)))
+        assertSnapshot(of: view, as: .image(layout: .device(config: .iPhone13ProMax)))
+    }
+}</code></pre>
+
+        <h3>Snapshot Strategies</h3>
+        <p>swift-snapshot-testing supports multiple snapshot types:</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Strategy</th>
+                    <th>Use Case</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>.image</code></td>
+                    <td>Visual snapshot of views, view controllers, layers</td>
+                </tr>
+                <tr>
+                    <td><code>.recursiveDescription</code></td>
+                    <td>Text representation of view hierarchy (like Espresso's hierarchy dump)</td>
+                </tr>
+                <tr>
+                    <td><code>.json</code></td>
+                    <td>Snapshot Codable objects as JSON</td>
+                </tr>
+                <tr>
+                    <td><code>.dump</code></td>
+                    <td>Swift's dump() output for any type</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pre><code>// Snapshot a UIViewController
+func testViewController() {
+    let vc = ProfileViewController()
+    vc.user = User(name: "John", avatar: nil)
+
+    assertSnapshot(of: vc, as: .image(on: .iPhone13))
+}
+
+// Snapshot as JSON (great for API responses)
+func testUserSerialization() {
+    let user = User(name: "John", age: 25, email: "john@example.com")
+
+    assertSnapshot(of: user, as: .json)
+}
+
+// Snapshot view hierarchy as text
+func testViewHierarchy() {
+    let view = ComplexView()
+
+    assertSnapshot(of: view, as: .recursiveDescription)
+}</code></pre>
+
+        <h3>Recording and Updating Snapshots</h3>
+        <pre><code>// First run: Record the snapshot (set record = true)
+func testProfileView() {
+    let view = ProfileView(user: testUser)
+
+    // Set to true to record new reference snapshots
+    // Remember to set back to false!
+    assertSnapshot(of: view, as: .image, record: true)
+}
+
+// Or use environment variable for CI
+// SNAPSHOT_TESTING_RECORD=1 xcodebuild test ...</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Snapshot tests are great for catching regressions but can be brittle. Keep these best practices in
+                    mind:</p>
+                <ul>
+                    <li>Use fixed device sizes and avoid system-dependent content (like current date/time)</li>
+                    <li>Store reference images in version control so the team shares the same baseline</li>
+                    <li>Consider testing light and dark mode separately</li>
+                    <li>Use text-based snapshots (JSON, description) for non-visual components</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Common Testing Pitfalls</h2>
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfalls</div>
+            <div class="callout-content">
+                <ol>
+                    <li>
+                        <strong>Forgetting the "test" prefix in XCTest:</strong> Unlike JUnit's <code>@Test</code>
+                        annotation, XCTest requires methods to start with "test" to be recognized. <code>func
+                        userLoading()</code> won't run; use <code>func testUserLoading()</code>.
+                    </li>
+                    <li>
+                        <strong>Not calling <code>super.setUp()</code> and <code>super.tearDown()</code>:</strong>
+                        Always call the superclass methods in your lifecycle overrides. Forgetting this can cause subtle
+                        test failures and resource leaks.
+                    </li>
+                    <li>
+                        <strong>UI tests failing due to missing accessibility identifiers:</strong> XCUITest relies on
+                        accessibility identifiers to find elements. If your tests can't find elements, add <code>.accessibilityIdentifier("myButton")</code>
+                        to your views.
+                    </li>
+                    <li>
+                        <strong>Not waiting for async operations in UI tests:</strong> Unlike Espresso's automatic
+                        synchronization, XCUITest requires explicit waits. Use <code>element.waitForExistence(timeout:
+                        5)</code> for elements that appear asynchronously.
+                    </li>
+                    <li>
+                        <strong>Testing implementation instead of behavior:</strong> Don't verify that specific internal
+                        methods were called. Instead, verify observable outcomes. This makes tests less brittle when
+                        refactoring.
+                    </li>
+                    <li>
+                        <strong>Flaky tests due to animation timing:</strong> Disable animations in UI tests by setting
+                        <code>UIView.setAnimationsEnabled(false)</code> in setUp, or use <code>app.launchArguments =
+                        ["-UIViewAnimationsDisabled", "YES"]</code>.
+                    </li>
+                    <li>
+                        <strong>Not resetting state between tests:</strong> Each test should be independent. Use <code>tearDown()</code>
+                        to reset singletons, clear UserDefaults, and clean up any persistent state. Consider using a
+                        fresh app launch for each UI test.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Write XCTest unit tests</li>
+            <li>Create UI tests</li>
+            <li>Mock dependencies</li>
+            <li>Test async code</li>
+            <li>Try snapshot testing</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a fully tested "Notes" feature with unit tests, mock dependencies, and UI tests. This exercise will
+            reinforce all the testing concepts covered in this module.</p>
+        <ol>
+            <li>
+                <strong>Create the production code:</strong>
+                <ul>
+                    <li>Create a <code>NotesRepository</code> protocol with <code>fetchNotes()</code>, <code>saveNote(Note)</code>,
+                        and <code>deleteNote(id:)</code> methods
+                    </li>
+                    <li>Implement a <code>NotesViewModel</code> that uses the repository</li>
+                    <li>Add async error handling for network failures</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Write unit tests:</strong>
+                <ul>
+                    <li>Create a <code>MockNotesRepository</code> that implements the protocol</li>
+                    <li>Test that <code>fetchNotes()</code> updates the ViewModel state correctly</li>
+                    <li>Test error states when the repository throws</li>
+                    <li>Verify the repository is called with correct parameters</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Write UI tests:</strong>
+                <ul>
+                    <li>Add accessibility identifiers to your notes list and add/delete buttons</li>
+                    <li>Test adding a new note and verifying it appears in the list</li>
+                    <li>Test deleting a note with swipe-to-delete</li>
+                    <li>Test empty state when no notes exist</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Bonus - Swift Testing:</strong>
+                <ul>
+                    <li>Rewrite one test class using Swift Testing's <code>@Test</code> macro</li>
+                    <li>Add a parameterized test that validates different note title lengths</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Assertion</th>
+                    <th>XCTest</th>
+                    <th>Swift Testing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Equal</td>
+                    <td><code>XCTAssertEqual(a, b)</code></td>
+                    <td><code>#expect(a == b)</code></td>
+                </tr>
+                <tr>
+                    <td>Not Equal</td>
+                    <td><code>XCTAssertNotEqual(a, b)</code></td>
+                    <td><code>#expect(a != b)</code></td>
+                </tr>
+                <tr>
+                    <td>True</td>
+                    <td><code>XCTAssertTrue(x)</code></td>
+                    <td><code>#expect(x)</code></td>
+                </tr>
+                <tr>
+                    <td>False</td>
+                    <td><code>XCTAssertFalse(x)</code></td>
+                    <td><code>#expect(!x)</code></td>
+                </tr>
+                <tr>
+                    <td>Nil</td>
+                    <td><code>XCTAssertNil(x)</code></td>
+                    <td><code>#expect(x == nil)</code></td>
+                </tr>
+                <tr>
+                    <td>Not Nil</td>
+                    <td><code>XCTAssertNotNil(x)</code></td>
+                    <td><code>#expect(x != nil)</code></td>
+                </tr>
+                <tr>
+                    <td>Throws</td>
+                    <td><code>XCTAssertThrowsError(try expr)</code></td>
+                    <td><code>#expect(throws: ErrorType.self) { try expr }</code></td>
+                </tr>
+                <tr>
+                    <td>No Throw</td>
+                    <td><code>XCTAssertNoThrow(try expr)</code></td>
+                    <td><code>try expr</code> (test fails on throw)</td>
+                </tr>
+                <tr>
+                    <td>Async</td>
+                    <td><code>async func test...()</code></td>
+                    <td><code>@Test func name() async</code></td>
+                </tr>
+                <tr>
+                    <td>Skip</td>
+                    <td><code>throw XCTSkip("reason")</code></td>
+                    <td>Use <code>@Test(.disabled("reason"))</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References & Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/xctest">Apple XCTest Documentation</a> - Official
+                XCTest framework reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/testing">Swift Testing Documentation</a> - Apple's
+                guide to the new Swift Testing framework
+            </li>
+            <li><a href="https://developer.apple.com/documentation/xctest/user_interface_tests">XCUITest
+                Documentation</a> - Writing UI tests with XCUITest
+            </li>
+            <li><a href="https://developer.apple.com/documentation/xctest/asynchronous_tests_and_expectations">Asynchronous
+                Testing</a> - Testing async code with expectations
+            </li>
+            <li><a href="https://github.com/pointfreeco/swift-snapshot-testing">swift-snapshot-testing</a> -
+                Point-Free's snapshot testing library
+            </li>
+            <li><a href="https://github.com/birdrides/mockingbird">Mockingbird</a> - Swift mocking framework with code
+                generation
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2024/10179/">WWDC 2024: Meet Swift Testing</a> -
+                Apple's introduction to Swift Testing
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2021/10296/">WWDC 2021: UI Testing in Xcode</a> -
+                Best practices for XCUITest
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="08-di-spm.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">DI & SPM</span></a>
+        <a class="module-nav-link next" href="10-debugging-shipping.html"><span
+                class="module-nav-label">Next</span><span class="module-nav-title">Debugging & Shipping</span></a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

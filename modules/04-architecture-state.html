@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="Map MVVM and Clean Architecture to iOS. Learn Combine, ObservableObject, and SwiftUI data flow for Android developers."
+          name="description">
+    <title>Architecture & State Management | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/04-architecture-state.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="Architecture & State Management | iOS for Android Developers" property="og:title">
+    <meta content="Map MVVM and Clean Architecture to iOS. Learn Combine and SwiftUI data flow."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/04-architecture-state.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="Architecture & State Management | iOS for Android Developers" name="twitter:title">
+    <meta content="Map MVVM and Clean Architecture to iOS." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option selected value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 4</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">04</span>
+        <h1>Architecture & State Management</h1>
+        <p class="module-description">Map your MVVM and Clean Architecture knowledge to iOS. Understand Combine,
+            ObservableObject, and data flow.</p>
+        <div class="estimated-time">Estimated time: 40 minutes</div>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Implement MVVM pattern in SwiftUI</li>
+            <li>Understand @State, @Binding, @StateObject, and @ObservedObject</li>
+            <li>Use Combine framework for reactive programming</li>
+            <li>Map Clean Architecture concepts to iOS</li>
+            <li>Handle app-wide state with @EnvironmentObject</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Architecture Pattern Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS Equivalent</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>ViewModel</code></td>
+                    <td><code>ObservableObject</code></td>
+                    <td>Both survive view recreation. iOS lacks lifecycle-aware component.</td>
+                </tr>
+                <tr>
+                    <td><code>LiveData</code></td>
+                    <td><code>@Published</code></td>
+                    <td>Both are observable. @Published auto-notifies subscribers.</td>
+                </tr>
+                <tr>
+                    <td><code>StateFlow</code></td>
+                    <td><code>CurrentValueSubject</code></td>
+                    <td>Hot stream with initial value. Both retain last value.</td>
+                </tr>
+                <tr>
+                    <td><code>SharedFlow</code></td>
+                    <td><code>PassthroughSubject</code></td>
+                    <td>Hot stream without replay. Events only to active subscribers.</td>
+                </tr>
+                <tr>
+                    <td><code>Flow</code></td>
+                    <td><code>AnyPublisher</code></td>
+                    <td>Cold stream. Starts producing on subscription.</td>
+                </tr>
+                <tr>
+                    <td><code>collectAsState()</code></td>
+                    <td><code>.receive(on:)</code></td>
+                    <td>Observe on main thread for UI updates.</td>
+                </tr>
+                <tr>
+                    <td><code>Repository</code></td>
+                    <td><code>Repository</code></td>
+                    <td>Same pattern. Abstracts data sources.</td>
+                </tr>
+                <tr>
+                    <td><code>UseCase</code></td>
+                    <td><code>UseCase</code> / Interactor</td>
+                    <td>Same pattern. Single responsibility business logic.</td>
+                </tr>
+                <tr>
+                    <td><code>viewModelScope</code></td>
+                    <td>Combine <code>cancellables</code></td>
+                    <td>Auto-cancellation tied to lifecycle.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>SwiftUI Property Wrappers Deep Dive</h2>
+        <p>SwiftUI uses property wrappers to manage state. Understanding when to use each is critical—it's the most
+            common source of bugs for iOS newcomers.</p>
+
+        <h3>@State: Local View State</h3>
+        <p>Use <code>@State</code> for simple, local values owned by the view. Similar to <code>remember {
+            mutableStateOf() }</code> in Compose.</p>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose</span></div>
+                <pre><code class="language-kotlin">@Composable
+fun ExpandableCard() {
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    Card(onClick = { isExpanded = !isExpanded }) {
+        // Content
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">struct ExpandableCard: View {
+    @State private var isExpanded = false
+
+    var body: some View {
+        Button(action: { isExpanded.toggle() }) {
+            // Content
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>@Binding: Two-Way Connection</h3>
+        <p>Pass state down to child views for modification. Creates a two-way binding.</p>
+        <pre><code class="language-swift">struct ParentView: View {
+    @State private var username = ""
+
+    var body: some View {
+        // Pass binding with $ prefix
+        UsernameField(text: $username)
+    }
+}
+
+struct UsernameField: View {
+    @Binding var text: String  // Receives binding
+
+    var body: some View {
+        TextField("Username", text: $text)
+    }
+}</code></pre>
+
+        <h3>@StateObject vs @ObservedObject</h3>
+        <p>This is the most confusing distinction for newcomers:</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Wrapper</th>
+                    <th>When to Use</th>
+                    <th>Lifecycle</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>@StateObject</code></td>
+                    <td>You create the object</td>
+                    <td>Survives view re-renders</td>
+                </tr>
+                <tr>
+                    <td><code>@ObservedObject</code></td>
+                    <td>Object passed from parent</td>
+                    <td>Does NOT survive view re-renders</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pre><code class="language-swift">// CORRECT: Use @StateObject when YOU create the object
+struct UserScreen: View {
+    @StateObject private var viewModel = UserViewModel()
+    // viewModel survives when UserScreen re-renders
+}
+
+// CORRECT: Use @ObservedObject when parent passes it
+struct UserDetail: View {
+    @ObservedObject var viewModel: UserViewModel
+    // viewModel is owned by parent, we just observe it
+}
+
+// WRONG: This causes the ViewModel to be recreated!
+struct BrokenScreen: View {
+    @ObservedObject var viewModel = UserViewModel() // BUG!
+}</code></pre>
+
+        <h3>@EnvironmentObject: App-Wide State</h3>
+        <p>Similar to Compose's <code>CompositionLocalProvider</code>. Inject shared state through the view hierarchy.
+        </p>
+        <pre><code class="language-swift">// 1. Define the shared state
+class AppState: ObservableObject {
+    @Published var isLoggedIn = false
+    @Published var currentUser: User?
+}
+
+// 2. Provide at app root
+@main
+struct MyApp: App {
+    @StateObject private var appState = AppState()
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(appState)
+        }
+    }
+}
+
+// 3. Access anywhere in hierarchy
+struct ProfileView: View {
+    @EnvironmentObject var appState: AppState
+
+    var body: some View {
+        Text("Hello, \(appState.currentUser?.name ?? "Guest")")
+    }
+}</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>Android's <code>ViewModel</code> is lifecycle-aware and survives configuration changes automatically.
+                    iOS's <code>ObservableObject</code> requires <code>@StateObject</code> to achieve similar behavior.
+                    If you use <code>@ObservedObject</code> incorrectly, your "ViewModel" gets recreated on every view
+                    update—a common bug when migrating from Android.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>MVVM in SwiftUI</h2>
+        <p>MVVM works naturally with SwiftUI. The ViewModel is an <code>ObservableObject</code>, and the View observes
+            it. The pattern is nearly identical to Android's approach.</p>
+
+        <h3>Complete ViewModel Example</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Android</span></div>
+                <pre><code class="language-kotlin">class UserViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(
+        UserUiState()
+    )
+    val uiState: StateFlow&lt;UserUiState&gt; =
+        _uiState.asStateFlow()
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val user = repository.getUser(id)
+                _uiState.update {
+                    it.copy(user = user, isLoading = false)
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = e.message, isLoading = false)
+                }
+            }
+        }
+    }
+}
+
+data class UserUiState(
+    val user: User? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">@MainActor
+class UserViewModel: ObservableObject {
+    private let repository: UserRepository
+
+    @Published var user: User?
+    @Published var isLoading = false
+    @Published var error: String?
+
+    init(repository: UserRepository) {
+        self.repository = repository
+    }
+
+    func loadUser(id: String) async {
+        isLoading = true
+        error = nil
+
+        do {
+            user = try await repository.getUser(id: id)
+        } catch {
+            self.error = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+}
+
+// Or using a single state struct:
+struct UserUiState {
+    var user: User?
+    var isLoading = false
+    var error: String?
+}
+
+@MainActor
+class UserViewModel: ObservableObject {
+    @Published var state = UserUiState()
+    // ...
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Connecting View to ViewModel</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose</span></div>
+                <pre><code class="language-kotlin">@Composable
+fun UserScreen(
+    viewModel: UserViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUser(userId)
+    }
+
+    when {
+        uiState.isLoading -> LoadingSpinner()
+        uiState.error != null -> ErrorView(uiState.error)
+        uiState.user != null -> UserContent(uiState.user)
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">struct UserScreen: View {
+    @StateObject private var viewModel: UserViewModel
+    let userId: String
+
+    init(userId: String, repository: UserRepository) {
+        self.userId = userId
+        _viewModel = StateObject(wrappedValue:
+            UserViewModel(repository: repository)
+        )
+    }
+
+    var body: some View {
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+            } else if let error = viewModel.error {
+                ErrorView(message: error)
+            } else if let user = viewModel.user {
+                UserContent(user: user)
+            }
+        }
+        .task {
+            await viewModel.loadUser(id: userId)
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Key Differences</h3>
+        <ul>
+            <li><strong>@MainActor</strong>: Ensures all @Published updates happen on main thread (like <code>Dispatchers.Main</code>)
+            </li>
+            <li><strong>.task modifier</strong>: Equivalent to <code>LaunchedEffect</code>. Automatically cancelled when
+                view disappears.
+            </li>
+            <li><strong>No viewModelScope</strong>: Use Swift's structured concurrency with <code>async/await</code>.
+                Tasks are tied to view lifecycle via <code>.task</code>.
+            </li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Combine Framework</h2>
+        <p>Combine is Apple's reactive framework, conceptually identical to Kotlin Flow/RxJava. While Swift's <code>async/await</code>
+            is often preferred for simple cases, Combine shines for complex reactive chains.</p>
+
+        <h3>Publishers and Subscribers</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin Flow</span></div>
+                <pre><code class="language-kotlin">// Flow operators
+repository.getUsers()
+    .map { users -> users.filter { it.isActive } }
+    .catch { emit(emptyList()) }
+    .flowOn(Dispatchers.IO)
+    .collect { users ->
+        updateUI(users)
+    }</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Combine</span></div>
+                <pre><code class="language-swift">// Combine operators
+repository.getUsers()
+    .map { users in users.filter { $0.isActive } }
+    .replaceError(with: [])
+    .receive(on: DispatchQueue.main)
+    .sink { users in
+        updateUI(users)
+    }
+    .store(in: &cancellables)</code></pre>
+            </div>
+        </div>
+
+        <h3>Common Operators Mapping</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Kotlin Flow</th>
+                    <th>Combine</th>
+                    <th>Purpose</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>map { }</code></td>
+                    <td><code>map { }</code></td>
+                    <td>Transform elements</td>
+                </tr>
+                <tr>
+                    <td><code>filter { }</code></td>
+                    <td><code>filter { }</code></td>
+                    <td>Filter elements</td>
+                </tr>
+                <tr>
+                    <td><code>flatMapLatest { }</code></td>
+                    <td><code>flatMap { }</code> / <code>switchToLatest()</code></td>
+                    <td>Switch to new stream</td>
+                </tr>
+                <tr>
+                    <td><code>debounce(300)</code></td>
+                    <td><code>debounce(for: .milliseconds(300), scheduler:)</code></td>
+                    <td>Debounce emissions</td>
+                </tr>
+                <tr>
+                    <td><code>distinctUntilChanged()</code></td>
+                    <td><code>removeDuplicates()</code></td>
+                    <td>Skip duplicates</td>
+                </tr>
+                <tr>
+                    <td><code>catch { }</code></td>
+                    <td><code>catch { }</code> / <code>replaceError(with:)</code></td>
+                    <td>Handle errors</td>
+                </tr>
+                <tr>
+                    <td><code>flowOn(Dispatchers.IO)</code></td>
+                    <td><code>subscribe(on: DispatchQueue.global())</code></td>
+                    <td>Background execution</td>
+                </tr>
+                <tr>
+                    <td><code>collect { }</code></td>
+                    <td><code>sink { }</code></td>
+                    <td>Subscribe to values</td>
+                </tr>
+                <tr>
+                    <td><code>combine(flow1, flow2) { }</code></td>
+                    <td><code>Publishers.CombineLatest(p1, p2)</code></td>
+                    <td>Combine latest values</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Subjects (Hot Streams)</h3>
+        <pre><code class="language-swift">// CurrentValueSubject = StateFlow (hot, has current value)
+let searchQuery = CurrentValueSubject&lt;String, Never&gt;("")
+searchQuery.value = "new query"  // Update value
+searchQuery.send("another query")  // Or use send()
+
+// PassthroughSubject = SharedFlow (hot, no current value)
+let events = PassthroughSubject&lt;Event, Never&gt;()
+events.send(.userTapped)  // Only received by current subscribers</code></pre>
+
+        <h3>@Published Under the Hood</h3>
+        <p><code>@Published</code> is syntactic sugar for a <code>CurrentValueSubject</code>:</p>
+        <pre><code class="language-swift">class ViewModel: ObservableObject {
+    @Published var query = ""  // This creates a publisher
+
+    var cancellables = Set&lt;AnyCancellable&gt;()
+
+    init() {
+        // Access the publisher with $ prefix
+        $query
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] query in
+                self?.search(query: query)
+            }
+            .store(in: &cancellables)
+    }
+}</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Always store Combine subscriptions in a <code>Set&lt;AnyCancellable&gt;</code> property. When the set
+                    is deallocated, all subscriptions are automatically cancelled—similar to how
+                    <code>viewModelScope</code> cancels coroutines. Forgetting to store subscriptions is a common bug
+                    that causes "silent" failures where nothing happens.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Data Flow Patterns</h2>
+        <p>SwiftUI enforces unidirectional data flow: state flows down, actions flow up. This is the same principle as
+            Android's UDF (Unidirectional Data Flow) with Compose.</p>
+
+        <h3>Unidirectional Data Flow</h3>
+        <pre><code class="language-swift">// State flows DOWN through the view hierarchy
+struct ParentView: View {
+    @StateObject private var viewModel = ParentViewModel()
+
+    var body: some View {
+        ChildView(
+            items: viewModel.items,           // State down
+            onItemTap: { viewModel.selectItem($0) }  // Action up
+        )
+    }
+}
+
+struct ChildView: View {
+    let items: [Item]              // Receive state (read-only)
+    let onItemTap: (Item) -> Void  // Send actions up
+
+    var body: some View {
+        ForEach(items) { item in
+            Button(item.name) {
+                onItemTap(item)  // Action bubbles up
+            }
+        }
+    }
+}</code></pre>
+
+        <h3>One-Way Events (Side Effects)</h3>
+        <p>For one-time events like navigation or showing alerts, use a pattern similar to Android's
+            <code>SharedFlow</code> events:</p>
+        <pre><code class="language-swift">@MainActor
+class ViewModel: ObservableObject {
+    @Published var navigateToDetail: User?  // Trigger navigation
+    @Published var showError: String?       // Trigger alert
+
+    func onUserTapped(_ user: User) {
+        navigateToDetail = user
+    }
+
+    func handleError(_ error: Error) {
+        showError = error.localizedDescription
+    }
+}
+
+struct UserListView: View {
+    @StateObject private var viewModel = ViewModel()
+
+    var body: some View {
+        List { /* ... */ }
+            .navigationDestination(item: $viewModel.navigateToDetail) { user in
+                UserDetailView(user: user)
+            }
+            .alert("Error", isPresented: .constant(viewModel.showError != nil)) {
+                Button("OK") { viewModel.showError = nil }
+            } message: {
+                Text(viewModel.showError ?? "")
+            }
+    }
+}</code></pre>
+
+        <h3>Common Pitfalls</h3>
+        <ul class="pitfalls-list">
+            <li><strong>Mutating @State from child views</strong>: Pass <code>@Binding</code> or closures, don't expose
+                @State directly.
+            </li>
+            <li><strong>Not using weak self in closures</strong>: Combine sinks and async callbacks can create retain
+                cycles. Use <code>[weak self]</code>.
+            </li>
+            <li><strong>Publishing changes from background threads</strong>: All <code>@Published</code> updates must
+                happen on the main thread. Use <code>@MainActor</code> or <code>receive(on: DispatchQueue.main)</code>.
+            </li>
+            <li><strong>Over-notifying</strong>: Each @Published property triggers view updates. Consider grouping
+                related state into a single struct.
+            </li>
+            <li><strong>Storing derived state</strong>: Don't store values that can be computed from other state. Use
+                computed properties instead.
+            </li>
+        </ul>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p>SwiftUI views are value types (structs) and are frequently recreated. Don't assume a view instance
+                    persists. State that needs to survive recreation must use <code>@State</code>,
+                    <code>@StateObject</code>, or come from a parent. This is why directly initializing <code>@ObservedObject</code>
+                    in the view body causes bugs—the object is recreated every time the view body is evaluated.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Clean Architecture in iOS</h2>
+        <p>Clean Architecture translates directly to iOS. The layers and dependencies work exactly as in Android—just
+            with Swift types.</p>
+
+        <h3>Layer Structure</h3>
+        <pre><code class="language-swift">// DOMAIN LAYER (pure Swift, no iOS frameworks)
+// ─────────────────────────────────────────────
+
+// Entity
+struct User: Identifiable {
+    let id: UUID
+    let name: String
+    let email: String
+}
+
+// Repository Protocol (interface)
+protocol UserRepository {
+    func getUser(id: UUID) async throws -> User
+    func saveUser(_ user: User) async throws
+}
+
+// Use Case
+class GetUserUseCase {
+    private let repository: UserRepository
+
+    init(repository: UserRepository) {
+        self.repository = repository
+    }
+
+    func execute(id: UUID) async throws -> User {
+        try await repository.getUser(id: id)
+    }
+}
+
+// DATA LAYER (implementations)
+// ─────────────────────────────────────────────
+
+class UserRepositoryImpl: UserRepository {
+    private let remoteDataSource: UserRemoteDataSource
+    private let localDataSource: UserLocalDataSource
+
+    func getUser(id: UUID) async throws -> User {
+        if let cached = try? await localDataSource.getUser(id: id) {
+            return cached
+        }
+        let user = try await remoteDataSource.fetchUser(id: id)
+        try? await localDataSource.saveUser(user)
+        return user
+    }
+}
+
+// PRESENTATION LAYER (SwiftUI)
+// ─────────────────────────────────────────────
+
+@MainActor
+class UserViewModel: ObservableObject {
+    private let getUserUseCase: GetUserUseCase
+
+    @Published var user: User?
+    @Published var error: String?
+
+    init(getUserUseCase: GetUserUseCase) {
+        self.getUserUseCase = getUserUseCase
+    }
+
+    func loadUser(id: UUID) async {
+        do {
+            user = try await getUserUseCase.execute(id: id)
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+}</code></pre>
+
+        <h3>Folder Structure</h3>
+        <pre><code class="language-bash">MyApp/
+├── Domain/
+│   ├── Entities/
+│   │   └── User.swift
+│   ├── Repositories/
+│   │   └── UserRepository.swift (protocol)
+│   └── UseCases/
+│       └── GetUserUseCase.swift
+├── Data/
+│   ├── Repositories/
+│   │   └── UserRepositoryImpl.swift
+│   ├── DataSources/
+│   │   ├── UserRemoteDataSource.swift
+│   │   └── UserLocalDataSource.swift
+│   └── Models/
+│       └── UserDTO.swift
+└── Presentation/
+    ├── Screens/
+    │   └── User/
+    │       ├── UserScreen.swift
+    │       └── UserViewModel.swift
+    └── Components/
+        └── UserCard.swift</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Industry Pattern: TCA (The Composable Architecture)</div>
+            <div class="callout-content">
+                <p>While vanilla MVVM works well, many iOS teams use <strong>TCA (The Composable Architecture)</strong>
+                    by Point-Free. TCA is similar to Android's MVI pattern—it uses a single state, reducers for state
+                    changes, and effects for side effects. It provides excellent testability and enforces strict
+                    unidirectional data flow. Consider TCA for complex apps with many interacting features.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Understand property wrappers</li>
+            <li>Implement MVVM pattern</li>
+            <li>Use Combine basics</li>
+            <li>Handle environment objects</li>
+            <li>Apply Clean Architecture</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a simple "Notes" app using MVVM and Clean Architecture principles.</p>
+        <ol>
+            <li><strong>Create the Domain Layer</strong>: Define a <code>Note</code> entity with id, title, content, and
+                createdAt. Create a <code>NoteRepository</code> protocol with CRUD methods.
+            </li>
+            <li><strong>Implement the Data Layer</strong>: Create <code>NoteRepositoryImpl</code> that stores notes in
+                memory (use a simple array for now). Map between any DTOs and domain entities.
+            </li>
+            <li><strong>Build the ViewModel</strong>: Create <code>NotesListViewModel</code> with @Published properties
+                for notes array and loading state. Implement add, delete, and load functions.
+            </li>
+            <li><strong>Create the View</strong>: Build a <code>NotesListView</code> that displays notes in a List, with
+                swipe-to-delete and a button to add new notes. Use <code>@StateObject</code> for the ViewModel.
+            </li>
+            <li><strong>Add Detail Screen</strong>: Create <code>NoteDetailView</code> for editing. Pass the note via
+                navigation and use <code>@Binding</code> or callbacks to save changes.
+            </li>
+            <li><strong>Bonus</strong>: Add a Combine-based search feature with debounce in the ViewModel.</li>
+        </ol>
+        <div class="callout tip">
+            <div class="callout-title">Exercise Tip</div>
+            <div class="callout-content">
+                <p>Start with the ViewModel and domain layer before building the UI. This lets you verify your state
+                    management logic works before adding the visual layer.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+
+        <h3>Property Wrappers</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Property Wrapper</th>
+                    <th>Use Case</th>
+                    <th>Owner</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>@State</code></td>
+                    <td>Simple local value (Bool, String, Int)</td>
+                    <td>Current view</td>
+                </tr>
+                <tr>
+                    <td><code>@Binding</code></td>
+                    <td>Two-way reference to parent's state</td>
+                    <td>Parent view</td>
+                </tr>
+                <tr>
+                    <td><code>@StateObject</code></td>
+                    <td>ObservableObject YOU create</td>
+                    <td>Current view</td>
+                </tr>
+                <tr>
+                    <td><code>@ObservedObject</code></td>
+                    <td>ObservableObject passed from parent</td>
+                    <td>Parent view</td>
+                </tr>
+                <tr>
+                    <td><code>@EnvironmentObject</code></td>
+                    <td>Shared object through view hierarchy</td>
+                    <td>Ancestor view</td>
+                </tr>
+                <tr>
+                    <td><code>@Environment</code></td>
+                    <td>System values (colorScheme, dismiss)</td>
+                    <td>System</td>
+                </tr>
+                <tr>
+                    <td><code>@Published</code></td>
+                    <td>Observable property in ObservableObject</td>
+                    <td>ViewModel</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Combine Quick Reference</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Code</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Subscribe to publisher</td>
+                    <td><code>.sink { value in }</code></td>
+                </tr>
+                <tr>
+                    <td>Store subscription</td>
+                    <td><code>.store(in: &cancellables)</code></td>
+                </tr>
+                <tr>
+                    <td>Main thread</td>
+                    <td><code>.receive(on: DispatchQueue.main)</code></td>
+                </tr>
+                <tr>
+                    <td>Background thread</td>
+                    <td><code>.subscribe(on: DispatchQueue.global())</code></td>
+                </tr>
+                <tr>
+                    <td>Debounce input</td>
+                    <td><code>.debounce(for: .milliseconds(300), scheduler: RunLoop.main)</code></td>
+                </tr>
+                <tr>
+                    <td>Skip duplicates</td>
+                    <td><code>.removeDuplicates()</code></td>
+                </tr>
+                <tr>
+                    <td>Access @Published publisher</td>
+                    <td><code>$propertyName</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>MVVM Template</h3>
+        <pre><code class="language-swift">@MainActor
+class MyViewModel: ObservableObject {
+    @Published var state = MyState()
+    private let useCase: MyUseCase
+
+    func onAction() async {
+        state.isLoading = true
+        do {
+            state.data = try await useCase.execute()
+        } catch {
+            state.error = error.localizedDescription
+        }
+        state.isLoading = false
+    }
+}</code></pre>
+    </section>
+
+    <section class="references">
+        <h2>References and Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/combine" rel="noopener" target="_blank">Apple Combine
+                Documentation</a> - Official Combine framework reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app"
+                   rel="noopener" target="_blank">Managing Model Data in Your App</a> - Apple's guide to SwiftUI state
+                management
+            </li>
+            <li><a href="https://developer.apple.com/documentation/swiftui/state-and-data-flow" rel="noopener"
+                   target="_blank">State and Data Flow</a> - Official SwiftUI data flow documentation
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2020/10040/" rel="noopener" target="_blank">WWDC20:
+                Data Essentials in SwiftUI</a> - Deep dive into @State, @Binding, and more
+            </li>
+            <li><a href="https://github.com/pointfreeco/swift-composable-architecture" rel="noopener" target="_blank">The
+                Composable Architecture (TCA)</a> - MVI-style architecture for SwiftUI (excellent for complex apps)
+            </li>
+            <li><a href="https://github.com/nicklockwood/SwiftFormat" rel="noopener" target="_blank">SwiftFormat</a> -
+                Code formatter to enforce consistent style
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="03-swiftui-uikit-interop.html"><span
+                class="module-nav-label">Previous</span><span class="module-nav-title">SwiftUI & UIKit</span></a>
+        <a class="module-nav-link next" href="05-concurrency.html"><span class="module-nav-label">Next</span><span
+                class="module-nav-title">Concurrency</span></a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

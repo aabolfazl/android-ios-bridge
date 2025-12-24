@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="iOS debugging with Xcode Instruments and App Store deployment. Learn profiling, code signing, TestFlight, and App Store submission."
+          name="description">
+    <title>Debugging & App Store Shipping | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/10-debugging-shipping.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="Debugging & App Store Shipping | iOS for Android Developers" property="og:title">
+    <meta content="iOS debugging and App Store deployment for Android developers." property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/10-debugging-shipping.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="Debugging & App Store Shipping | iOS for Android Developers" name="twitter:title">
+    <meta content="Xcode Instruments, profiling, and App Store deployment." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option selected value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 10</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">10</span>
+        <h1>Debugging & Shipping</h1>
+        <p class="module-description">Xcode instruments, profiling, and App Store deployment. From Play Store experience
+            to iOS distribution.</p>
+        <p class="module-time"><strong>Estimated Time:</strong> 35 minutes</p>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Debug effectively with Xcode's breakpoints, LLDB, and view hierarchy debugger</li>
+            <li>Profile performance with Instruments (Time Profiler, Allocations, Leaks)</li>
+            <li>Understand iOS code signing, certificates, and provisioning profiles</li>
+            <li>Deploy to TestFlight and manage beta testing</li>
+            <li>Navigate App Store submission and review process</li>
+            <li>Implement crash reporting with Xcode Organizer and third-party tools</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Tools & Process Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Logcat</td>
+                    <td>Console.app / <code>print</code> / <code>os_log</code></td>
+                    <td><code>os_log</code> provides structured logging with categories and levels; Console.app is the
+                        system-wide log viewer similar to <code>adb logcat</code></td>
+                </tr>
+                <tr>
+                    <td>Android Studio Profiler</td>
+                    <td>Instruments</td>
+                    <td>Instruments is a separate app with specialized templates; more powerful but steeper learning
+                        curve than integrated Android profiler
+                    </td>
+                </tr>
+                <tr>
+                    <td>Layout Inspector</td>
+                    <td>View Hierarchy Debugger</td>
+                    <td>Access via Debug > View Debugging > Capture View Hierarchy; shows 3D exploded view of UI
+                        layers
+                    </td>
+                </tr>
+                <tr>
+                    <td>Keystore / signing</td>
+                    <td>Certificates / Provisioning Profiles</td>
+                    <td>iOS requires both a certificate (identity) AND provisioning profile (permissions); more complex
+                        but more secure
+                    </td>
+                </tr>
+                <tr>
+                    <td>Play Console</td>
+                    <td>App Store Connect</td>
+                    <td>Both manage app metadata, releases, analytics, and user feedback; App Store Connect has stricter
+                        review process
+                    </td>
+                </tr>
+                <tr>
+                    <td>Internal testing track</td>
+                    <td>TestFlight</td>
+                    <td>TestFlight supports up to 10,000 external testers and 100 internal testers; requires Apple ID to
+                        install
+                    </td>
+                </tr>
+                <tr>
+                    <td>Release bundle (.aab)</td>
+                    <td>Archive (.ipa)</td>
+                    <td>Both contain compiled app; iOS archives include dSYM files for crash symbolication</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Xcode Debugging</h2>
+        <p>Xcode provides a comprehensive debugging environment that Android developers will find familiar yet more
+            integrated. The debugger is built on LLDB (Low Level Debugger), the same debugger used by Android Studio's
+            native debugging.</p>
+
+        <h3>Breakpoints</h3>
+        <p>Breakpoints in Xcode work similarly to Android Studio but offer additional power:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>Breakpoint Types in Xcode</span></div>
+            <pre><code class="language-swift">// Line Breakpoint: Click the gutter (same as Android Studio)
+
+// Conditional Breakpoint: Right-click breakpoint > Edit Breakpoint
+// Condition: user.id == 42
+
+// Symbolic Breakpoint: Debug > Breakpoints > Create Symbolic Breakpoint
+// Symbol: -[UIViewController viewDidLoad]
+// Catches ALL viewDidLoad calls across the app
+
+// Exception Breakpoint: Catches all Objective-C/Swift exceptions
+// Debug > Breakpoints > Create Exception Breakpoint
+
+// Watchpoint: Pause when a variable's value changes
+// In Variables view, right-click variable > Watch "variableName"</code></pre>
+        </div>
+
+        <h3>LLDB Commands</h3>
+        <p>The LLDB console (at the bottom of Xcode's debug area) provides powerful debugging commands:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>Essential LLDB Commands</span></div>
+            <pre><code class="language-bash"># Print variable value (like Android's Evaluate Expression)
+(lldb) po myVariable
+(lldb) p myVariable  # prints with type info
+
+# Print expression
+(lldb) po self.view.subviews.count
+
+# Change variable value at runtime
+(lldb) expr myVariable = 42
+
+# Print view hierarchy (like Layout Inspector dump)
+(lldb) po self.view.recursiveDescription()
+
+# Print responder chain
+(lldb) po self.view.responderChain()
+
+# Continue execution
+(lldb) c
+
+# Step over / step into / step out
+(lldb) n  # next (step over)
+(lldb) s  # step (step into)
+(lldb) finish  # step out
+
+# List breakpoints
+(lldb) br list
+
+# Print memory address contents
+(lldb) memory read 0x7fff5fbff8c0
+
+# Print backtrace
+(lldb) bt</code></pre>
+        </div>
+
+        <h3>View Hierarchy Debugger</h3>
+        <p>The View Hierarchy Debugger is Xcode's equivalent to Android's Layout Inspector:</p>
+        <ul>
+            <li><strong>Access:</strong> Debug > View Debugging > Capture View Hierarchy (or click the button in debug
+                bar)
+            </li>
+            <li><strong>3D View:</strong> Rotate to see layer stacking and identify overlapping views</li>
+            <li><strong>Constraints:</strong> Select any view to see its Auto Layout constraints</li>
+            <li><strong>Properties:</strong> Inspect frame, bounds, colors, fonts, and accessibility properties</li>
+            <li><strong>Memory Addresses:</strong> Useful for matching views to console output</li>
+        </ul>
+
+        <div class="callout compare">
+            <div class="callout-title">Android Studio vs Xcode Debugging</div>
+            <div class="callout-content">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Android Studio</th>
+                            <th>Xcode</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Debugger</td>
+                            <td>Java Debugger / LLDB (native)</td>
+                            <td>LLDB</td>
+                        </tr>
+                        <tr>
+                            <td>Evaluate Expression</td>
+                            <td>Alt+F8</td>
+                            <td><code>po expression</code> in LLDB or Debug > Debug Workflow > Evaluate Expression</td>
+                        </tr>
+                        <tr>
+                            <td>Conditional Breakpoint</td>
+                            <td>Right-click > Condition</td>
+                            <td>Right-click > Edit Breakpoint > Condition</td>
+                        </tr>
+                        <tr>
+                            <td>Logpoint</td>
+                            <td>Right-click > Log message</td>
+                            <td>Edit Breakpoint > Action > Log Message</td>
+                        </tr>
+                        <tr>
+                            <td>Hot Reload</td>
+                            <td>Apply Changes</td>
+                            <td>No equivalent (must rebuild); Xcode Previews help during development</td>
+                        </tr>
+                        <tr>
+                            <td>Inspect Layout</td>
+                            <td>Layout Inspector</td>
+                            <td>View Hierarchy Debugger</td>
+                        </tr>
+                        <tr>
+                            <td>Memory Graph</td>
+                            <td>Memory Profiler</td>
+                            <td>Debug Memory Graph (Debug > Debug Workflow > View Memory Graph)</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <h3>Logging Best Practices</h3>
+        <div class="code-block">
+            <div class="code-header"><span>Logging Comparison: Android vs iOS</span></div>
+            <pre><code class="language-kotlin">// Android - Logcat with tags
+Log.d("NetworkManager", "Request started: $url")
+Log.e("NetworkManager", "Request failed", exception)
+
+// Android - Timber (popular library)
+Timber.d("Request started: %s", url)
+Timber.e(exception, "Request failed")</code></pre>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header"><span>iOS Equivalent with os_log</span></div>
+            <pre><code class="language-swift">import os.log
+
+// Create a logger with subsystem and category (like Logcat tags)
+let logger = Logger(subsystem: "com.myapp.networking", category: "NetworkManager")
+
+// Log at different levels
+logger.debug("Request started: \(url)")
+logger.info("Response received: \(statusCode)")
+logger.error("Request failed: \(error.localizedDescription)")
+
+// For sensitive data, use privacy controls
+logger.debug("User ID: \(userId, privacy: .private)")
+
+// Legacy approach (still works)
+print("Debug: \(message)")  // Goes to console, not persisted
+
+// NSLog - includes timestamp, persisted to system log
+NSLog("Request started: %@", url)</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Instruments & Profiling</h2>
+        <p>Instruments is Apple's powerful profiling toolkit, comparable to Android Studio's Profiler but offered as a
+            separate application with more specialized tools. Launch it via Product > Profile (Cmd+I) or from Xcode's
+            toolbar.</p>
+
+        <h3>Key Instruments Templates</h3>
+
+        <h4>Time Profiler</h4>
+        <p>Identifies CPU bottlenecks by sampling the call stack at regular intervals. This is your go-to tool for
+            finding performance issues.</p>
+        <ul>
+            <li><strong>Call Tree:</strong> Shows hierarchical view of where time is spent</li>
+            <li><strong>Heaviest Stack Trace:</strong> Quickly find the most expensive code paths</li>
+            <li><strong>Invert Call Tree:</strong> See which functions consume the most time at the leaf level</li>
+            <li><strong>Hide System Libraries:</strong> Focus on your code by filtering out Apple frameworks</li>
+        </ul>
+
+        <div class="code-block">
+            <div class="code-header"><span>Simulating a Performance Issue to Profile</span></div>
+            <pre><code class="language-swift">// Example: Expensive computation on main thread
+func processData() {
+    // This will show up in Time Profiler
+    for i in 0..<1_000_000 {
+        let _ = String(i).hash
+    }
+}
+
+// Better: Move to background queue
+func processDataAsync() {
+    Task.detached(priority: .background) {
+        for i in 0..<1_000_000 {
+            let _ = String(i).hash
+        }
+        await MainActor.run {
+            // Update UI here
+        }
+    }
+}</code></pre>
+        </div>
+
+        <h4>Allocations</h4>
+        <p>Tracks all memory allocations, helping identify memory bloat and allocation patterns:</p>
+        <ul>
+            <li><strong>All Allocations:</strong> See every object created</li>
+            <li><strong>Statistics:</strong> View allocation counts by type</li>
+            <li><strong>Mark Generation:</strong> Take heap snapshots to compare memory between actions</li>
+            <li><strong>Transient vs Persistent:</strong> Identify objects that should have been deallocated</li>
+        </ul>
+
+        <h4>Leaks</h4>
+        <p>Detects memory leaks (objects that are allocated but never freed). Unlike Android's LeakCanary, this is
+            built-in:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>Common Memory Leak Pattern</span></div>
+            <pre><code class="language-swift">// LEAK: Strong reference cycle
+class ViewController: UIViewController {
+    var closure: (() -> Void)?
+
+    func setupClosure() {
+        // self is captured strongly, creating a cycle
+        closure = {
+            self.doSomething()  // LEAK!
+        }
+    }
+}
+
+// FIX: Use weak or unowned capture
+func setupClosure() {
+    closure = { [weak self] in
+        self?.doSomething()  // No leak
+    }
+}
+
+// Alternative: unowned when you're certain self will exist
+closure = { [unowned self] in
+    self.doSomething()  // Crashes if self is deallocated
+}</code></pre>
+        </div>
+
+        <h4>Additional Useful Instruments</h4>
+        <ul>
+            <li><strong>Network:</strong> Monitor HTTP traffic, similar to Android's Network Profiler</li>
+            <li><strong>Core Animation:</strong> Debug rendering performance, find offscreen renders</li>
+            <li><strong>Energy Log:</strong> Profile battery usage (critical for App Store approval)</li>
+            <li><strong>System Trace:</strong> Low-level system analysis including thread scheduling</li>
+        </ul>
+
+        <div class="callout tip">
+            <div class="callout-title">Profiling Tips</div>
+            <div class="callout-content">
+                <ul>
+                    <li><strong>Profile on Device:</strong> Always profile on a real device. Simulator runs on Mac
+                        hardware and won't show real-world performance.
+                    </li>
+                    <li><strong>Release Configuration:</strong> Profile Release builds, not Debug. Compiler
+                        optimizations significantly change performance characteristics.
+                    </li>
+                    <li><strong>Record Specific Flows:</strong> Start recording, perform the action you're
+                        investigating, stop recording. Don't capture unrelated activity.
+                    </li>
+                    <li><strong>Compare Before/After:</strong> Save traces before optimization to demonstrate
+                        improvement.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Code Signing & Certificates</h2>
+        <p>Code signing is significantly more complex on iOS than Android, but provides stronger security guarantees.
+            Understanding this system is essential for successful deployment.</p>
+
+        <h3>The Components</h3>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                    <th>Android Equivalent</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Apple Developer Account</strong></td>
+                    <td>Your identity with Apple ($99/year)</td>
+                    <td>Google Play Developer Account ($25 one-time)</td>
+                </tr>
+                <tr>
+                    <td><strong>Signing Certificate</strong></td>
+                    <td>Cryptographic identity proving you signed the app</td>
+                    <td>Keystore private key</td>
+                </tr>
+                <tr>
+                    <td><strong>App ID</strong></td>
+                    <td>Unique identifier for your app (bundle ID + capabilities)</td>
+                    <td>Application ID / Package Name</td>
+                </tr>
+                <tr>
+                    <td><strong>Provisioning Profile</strong></td>
+                    <td>Links certificate, App ID, and device list; grants capabilities</td>
+                    <td>No direct equivalent</td>
+                </tr>
+                <tr>
+                    <td><strong>Entitlements</strong></td>
+                    <td>Specific permissions/capabilities (Push, iCloud, etc.)</td>
+                    <td>Permissions in manifest</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Certificate Types</h3>
+        <ul>
+            <li><strong>Development:</strong> For running on your test devices during development</li>
+            <li><strong>Distribution (App Store):</strong> For submitting to App Store and TestFlight</li>
+            <li><strong>Distribution (Ad Hoc):</strong> For distributing to specific registered devices outside
+                TestFlight
+            </li>
+            <li><strong>Distribution (Enterprise):</strong> For internal enterprise distribution (requires Enterprise
+                account)
+            </li>
+        </ul>
+
+        <h3>Provisioning Profile Types</h3>
+        <ul>
+            <li><strong>Development:</strong> Links your development certificate to specific device UDIDs</li>
+            <li><strong>App Store:</strong> For App Store and TestFlight (no device list needed)</li>
+            <li><strong>Ad Hoc:</strong> For testing on specific devices (up to 100 per device type per year)</li>
+        </ul>
+
+        <div class="code-block">
+            <div class="code-header"><span>Android vs iOS Signing Workflow</span></div>
+            <pre><code class="language-bash"># Android Signing (Simple)
+# 1. Generate keystore once
+keytool -genkey -v -keystore my-release-key.jks \
+    -keyalg RSA -keysize 2048 -validity 10000
+
+# 2. Sign the app (usually handled by Gradle)
+# build.gradle: signingConfigs { release { storeFile file("my-release-key.jks") } }
+
+# 3. Upload to Play Console - Done!
+
+
+# iOS Signing (Complex)
+# 1. Create Apple Developer Account ($99/year)
+
+# 2. Generate Certificate Signing Request (CSR) in Keychain Access
+#    Keychain Access > Certificate Assistant > Request a Certificate
+
+# 3. Upload CSR to developer.apple.com, download certificate, install it
+
+# 4. Register your App ID at developer.apple.com
+#    Enable required capabilities (Push, Sign in with Apple, etc.)
+
+# 5. Register test device UDIDs (for development/ad-hoc)
+
+# 6. Create Provisioning Profile that combines:
+#    - Your certificate
+#    - Your App ID
+#    - Device list (for development/ad-hoc)
+
+# 7. Download and install provisioning profile
+
+# 8. In Xcode: Select team, signing certificate, and profile
+
+# OR use Automatic Signing (recommended for most cases)</code></pre>
+        </div>
+
+        <h3>Automatic vs Manual Signing</h3>
+        <p><strong>Automatic Signing (Recommended):</strong> Xcode manages certificates and profiles for you. Just
+            select your team and Xcode handles the rest. This works well for most projects.</p>
+        <p><strong>Manual Signing:</strong> Required when you need specific control, such as:</p>
+        <ul>
+            <li>CI/CD pipelines where you provide certificates</li>
+            <li>Enterprise distribution</li>
+            <li>Multiple teams or complex provisioning requirements</li>
+            <li>Specific entitlements not auto-managed by Xcode</li>
+        </ul>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Code Signing Pitfalls</div>
+            <div class="callout-content">
+                <ul>
+                    <li><strong>Certificate Expiration:</strong> Certificates expire after 1 year. Set calendar
+                        reminders to renew before expiration or your app builds will fail.
+                    </li>
+                    <li><strong>Provisioning Profile Mismatch:</strong> If you add capabilities (like Push
+                        Notifications), you must regenerate provisioning profiles or use automatic signing.
+                    </li>
+                    <li><strong>Team Confusion:</strong> Ensure the same team is selected in Xcode as the one that owns
+                        the App ID in App Store Connect.
+                    </li>
+                    <li><strong>Device Limit:</strong> You can only register 100 devices per device type per membership
+                        year for Ad Hoc distribution.
+                    </li>
+                    <li><strong>Keychain Issues:</strong> If certificates seem missing, check that Keychain Access shows
+                        both the certificate AND private key together.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>TestFlight Distribution</h2>
+        <p>TestFlight is Apple's beta testing platform, comparable to Google Play's internal and closed testing tracks
+            but with some key differences.</p>
+
+        <h3>TestFlight vs Play Console Testing</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Play Console</th>
+                    <th>TestFlight</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Internal Testers</td>
+                    <td>Up to 100</td>
+                    <td>Up to 100 (App Store Connect users)</td>
+                </tr>
+                <tr>
+                    <td>External Testers</td>
+                    <td>Unlimited (closed/open tracks)</td>
+                    <td>Up to 10,000</td>
+                </tr>
+                <tr>
+                    <td>Review Required</td>
+                    <td>No (internal), Yes (external)</td>
+                    <td>No (internal), Yes (first build + significant changes)</td>
+                </tr>
+                <tr>
+                    <td>Install Method</td>
+                    <td>Play Store</td>
+                    <td>TestFlight app</td>
+                </tr>
+                <tr>
+                    <td>Build Expiration</td>
+                    <td>None</td>
+                    <td>90 days</td>
+                </tr>
+                <tr>
+                    <td>Feedback</td>
+                    <td>Play Console</td>
+                    <td>In-app feedback, screenshots, crash logs</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>TestFlight Workflow</h3>
+        <ol>
+            <li><strong>Archive:</strong> Product > Archive in Xcode</li>
+            <li><strong>Upload:</strong> Organizer > Distribute App > App Store Connect</li>
+            <li><strong>Processing:</strong> Wait for App Store Connect to process (5-30 minutes)</li>
+            <li><strong>Internal Testing:</strong> Immediately available to internal testers</li>
+            <li><strong>External Testing:</strong> Submit for Beta App Review (usually &lt; 24 hours)</li>
+            <li><strong>Invite Testers:</strong> Via email or public link</li>
+        </ol>
+
+        <div class="code-block">
+            <div class="code-header"><span>TestFlight Build Upload via Command Line (Fastlane)</span></div>
+            <pre><code class="language-ruby"># Fastfile - Similar to Gradle tasks
+default_platform(:ios)
+
+platform :ios do
+  desc "Upload to TestFlight"
+  lane :beta do
+    # Increment build number
+    increment_build_number
+
+    # Build the app
+    build_app(
+      scheme: "MyApp",
+      export_method: "app-store"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+end
+
+# Run with: fastlane beta</code></pre>
+        </div>
+
+        <h3>What's New Text</h3>
+        <p>For each TestFlight build, provide "What to Test" notes. This helps testers focus on new features:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>Example TestFlight Notes</span></div>
+            <pre><code class="language-text">## What to Test - Build 42
+
+### New Features
+- Dark mode support (Settings > Appearance)
+- Pull-to-refresh on home screen
+
+### Bug Fixes
+- Fixed crash when rotating device on profile page
+- Resolved login issues with special characters in password
+
+### Known Issues
+- Photo upload may be slow on cellular connections
+
+Please report any issues via the TestFlight feedback option.</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>App Store Submission</h2>
+        <p>Submitting to the App Store is more rigorous than Google Play. Every submission goes through human review,
+            which typically takes 24-48 hours but can be longer.</p>
+
+        <h3>Pre-Submission Checklist</h3>
+        <ul>
+            <li><strong>App Icons:</strong> Provide 1024x1024 App Store icon (no transparency, no rounded corners)</li>
+            <li><strong>Screenshots:</strong> Required for each device size you support (use Simulator)</li>
+            <li><strong>App Preview Videos:</strong> Optional but recommended (15-30 seconds)</li>
+            <li><strong>Description:</strong> Clear, accurate description without keyword stuffing</li>
+            <li><strong>Privacy Policy URL:</strong> Required for all apps</li>
+            <li><strong>Support URL:</strong> Required</li>
+            <li><strong>Age Rating:</strong> Complete the questionnaire accurately</li>
+            <li><strong>App Privacy Details:</strong> Declare all data collection</li>
+        </ul>
+
+        <h3>Submission Workflow</h3>
+        <ol>
+            <li><strong>Archive:</strong> Product > Archive (ensure Release configuration)</li>
+            <li><strong>Validate:</strong> Organizer > Validate App (catches common issues)</li>
+            <li><strong>Upload:</strong> Organizer > Distribute App > App Store Connect</li>
+            <li><strong>App Store Connect:</strong> Select build, add metadata, submit for review</li>
+            <li><strong>Review:</strong> Wait for Apple's review (24-48 hours typical)</li>
+            <li><strong>Release:</strong> Manually or automatically after approval</li>
+        </ol>
+
+        <div class="code-block">
+            <div class="code-header"><span>Xcode Archive and Upload (Command Line)</span></div>
+            <pre><code class="language-bash"># Archive
+xcodebuild archive \
+    -workspace MyApp.xcworkspace \
+    -scheme MyApp \
+    -configuration Release \
+    -archivePath ./build/MyApp.xcarchive
+
+# Export IPA
+xcodebuild -exportArchive \
+    -archivePath ./build/MyApp.xcarchive \
+    -exportPath ./build \
+    -exportOptionsPlist ExportOptions.plist
+
+# Upload with altool (legacy) or xcrun notarytool (macOS apps)
+xcrun altool --upload-app \
+    --file ./build/MyApp.ipa \
+    --type ios \
+    --apiKey YOUR_API_KEY \
+    --apiIssuer YOUR_ISSUER_ID</code></pre>
+        </div>
+
+        <h3>Release Options</h3>
+        <ul>
+            <li><strong>Manual Release:</strong> You choose when to release after approval</li>
+            <li><strong>Automatic Release:</strong> Goes live immediately after approval</li>
+            <li><strong>Scheduled Release:</strong> Set a specific date/time</li>
+            <li><strong>Phased Release:</strong> Gradual rollout over 7 days (like Play Console staged rollout)</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>App Review Guidelines</h2>
+        <p>Apple's App Store Review Guidelines are more comprehensive and strictly enforced than Google Play's policies.
+            Understanding key guidelines prevents rejection.</p>
+
+        <h3>Key Guidelines to Know</h3>
+
+        <h4>1. Safety</h4>
+        <ul>
+            <li>No objectionable content</li>
+            <li>User-generated content must have reporting/blocking mechanisms</li>
+            <li>No realistic violence in kids apps</li>
+        </ul>
+
+        <h4>2. Performance</h4>
+        <ul>
+            <li>Apps must be complete (no "beta" or "demo" in name for production)</li>
+            <li>Must work without crashes or obvious bugs</li>
+            <li>Must use iOS features appropriately (no web-wrapped apps pretending to be native)</li>
+        </ul>
+
+        <h4>3. Business</h4>
+        <ul>
+            <li><strong>In-App Purchases:</strong> Digital goods MUST use Apple's IAP (30% commission)</li>
+            <li>Physical goods/services may use external payment</li>
+            <li>No links to external purchase methods for digital content</li>
+            <li>Subscriptions must clearly explain pricing and cancellation</li>
+        </ul>
+
+        <h4>4. Design</h4>
+        <ul>
+            <li>Must feel like a native iOS app (follow Human Interface Guidelines)</li>
+            <li>No empty features or fake functionality</li>
+            <li>Must have enough value (not just a single joke or trick)</li>
+        </ul>
+
+        <h4>5. Legal</h4>
+        <ul>
+            <li>Privacy policy required</li>
+            <li>Must comply with local laws</li>
+            <li>Intellectual property must be cleared</li>
+        </ul>
+
+        <h3>Common Rejection Reasons</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Reason</th>
+                    <th>Solution</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Crashes or bugs</td>
+                    <td>Test thoroughly on multiple devices and iOS versions</td>
+                </tr>
+                <tr>
+                    <td>Incomplete metadata</td>
+                    <td>Provide all required screenshots, descriptions, privacy policy</td>
+                </tr>
+                <tr>
+                    <td>External payment for digital goods</td>
+                    <td>Implement Apple's In-App Purchase</td>
+                </tr>
+                <tr>
+                    <td>Insufficient features</td>
+                    <td>Ensure app provides real value</td>
+                </tr>
+                <tr>
+                    <td>Privacy violations</td>
+                    <td>Request only necessary permissions, explain usage</td>
+                </tr>
+                <tr>
+                    <td>Misleading description</td>
+                    <td>Accurately describe what the app does</td>
+                </tr>
+                <tr>
+                    <td>Login required without guest mode</td>
+                    <td>Provide demo account or limited functionality without login</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">Review Tips</div>
+            <div class="callout-content">
+                <ul>
+                    <li><strong>Provide Demo Account:</strong> If your app requires login, provide test credentials in
+                        App Review Information
+                    </li>
+                    <li><strong>Explain Features:</strong> Use App Review Notes to explain non-obvious functionality
+                    </li>
+                    <li><strong>Include Video:</strong> For complex apps, attach a demo video showing how features work
+                    </li>
+                    <li><strong>Appeal Rejections:</strong> If you believe a rejection is wrong, use the Resolution
+                        Center to appeal
+                    </li>
+                    <li><strong>Expedited Review:</strong> Apple offers expedited review for critical bug fixes (use
+                        sparingly)
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Crash Reporting & Analytics</h2>
+        <p>Effective crash reporting is essential for maintaining app quality. iOS offers built-in tools plus excellent
+            third-party options.</p>
+
+        <h3>Xcode Organizer</h3>
+        <p>Access via Window > Organizer. The Crashes tab shows crashes reported from App Store and TestFlight
+            users:</p>
+        <ul>
+            <li><strong>Crash Logs:</strong> Automatically symbolicated if you uploaded dSYM files</li>
+            <li><strong>Statistics:</strong> Crash rate, affected users, device breakdown</li>
+            <li><strong>Stack Trace:</strong> Full call stack at crash point</li>
+            <li><strong>Thread State:</strong> All thread states at crash time</li>
+        </ul>
+
+        <h3>dSYM Files (Debug Symbols)</h3>
+        <p>dSYM files are crucial for crash symbolication (converting memory addresses to readable function names):</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>dSYM Management</span></div>
+            <pre><code class="language-bash"># Find dSYM in archive
+# ~/Library/Developer/Xcode/Archives/[date]/MyApp.xcarchive/dSYMs/
+
+# Verify dSYM matches build (check UUID)
+dwarfdump --uuid MyApp.app/MyApp
+dwarfdump --uuid MyApp.app.dSYM
+
+# Upload dSYM to crash reporting service
+# Firebase Crashlytics example:
+Pods/FirebaseCrashlytics/upload-symbols \
+    -gsp GoogleService-Info.plist \
+    -p ios MyApp.app.dSYM</code></pre>
+        </div>
+
+        <h3>Firebase Crashlytics (Recommended)</h3>
+        <p>Firebase Crashlytics works identically on iOS as Android, making it ideal for cross-platform teams:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>Firebase Crashlytics Setup</span></div>
+            <pre><code class="language-swift">// 1. Add to Package.swift or Podfile
+// .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.0.0")
+
+import FirebaseCrashlytics
+
+// 2. Initialize in App Delegate or App struct
+FirebaseApp.configure()
+
+// 3. Log custom keys (like Android)
+Crashlytics.crashlytics().setCustomValue("premium", forKey: "user_tier")
+Crashlytics.crashlytics().setUserID("user_123")
+
+// 4. Log non-fatal errors
+Crashlytics.crashlytics().record(error: myError)
+
+// 5. Log breadcrumbs
+Crashlytics.crashlytics().log("User tapped checkout button")
+
+// 6. Force crash for testing
+fatalError("Test crash")</code></pre>
+        </div>
+
+        <h3>MetricKit</h3>
+        <p>iOS 14+ includes MetricKit for collecting performance metrics and diagnostics:</p>
+
+        <div class="code-block">
+            <div class="code-header"><span>MetricKit Integration</span></div>
+            <pre><code class="language-swift">import MetricKit
+
+class MetricsManager: NSObject, MXMetricManagerSubscriber {
+
+    func startCollecting() {
+        MXMetricManager.shared.add(self)
+    }
+
+    // Receive daily metrics (battery, performance, etc.)
+    func didReceive(_ payloads: [MXMetricPayload]) {
+        for payload in payloads {
+            // Process launch time metrics
+            if let launchMetrics = payload.applicationLaunchMetrics {
+                print("Time to first draw: \(launchMetrics.histogrammedTimeToFirstDraw)")
+            }
+
+            // Upload to your analytics service
+            uploadMetrics(payload.jsonRepresentation())
+        }
+    }
+
+    // Receive diagnostic reports (crashes, hangs, disk writes)
+    func didReceive(_ payloads: [MXDiagnosticPayload]) {
+        for payload in payloads {
+            if let crashDiagnostics = payload.crashDiagnostics {
+                for crash in crashDiagnostics {
+                    print("Crash: \(crash.callStackTree)")
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+
+        <h3>Other Crash Reporting Options</h3>
+        <ul>
+            <li><strong>Sentry:</strong> Excellent for cross-platform, includes performance monitoring</li>
+            <li><strong>Bugsnag:</strong> Good stability monitoring with release tracking</li>
+            <li><strong>Instabug:</strong> Includes in-app feedback and bug reporting</li>
+            <li><strong>App Store Connect:</strong> Free but less detailed than third-party options</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Common Pitfalls</h2>
+        <div class="callout pitfall">
+            <div class="callout-title">Watch Out For These Issues</div>
+            <div class="callout-content">
+                <ol>
+                    <li>
+                        <strong>Certificate Expiration:</strong> iOS certificates expire yearly. Unlike Android
+                        keystores (valid for 25+ years), you must actively manage certificate renewal. Set calendar
+                        reminders 30 days before expiration.
+                    </li>
+                    <li>
+                        <strong>Provisioning Profile Capabilities Mismatch:</strong> Adding a capability in Xcode (like
+                        Push Notifications) requires regenerating provisioning profiles. With automatic signing, Xcode
+                        handles this, but manual signing requires explicit updates in Apple Developer portal.
+                    </li>
+                    <li>
+                        <strong>Missing dSYM Files:</strong> Without dSYM files, crash reports show memory addresses
+                        instead of function names. Always archive builds and preserve dSYMs. Enable "Upload Symbols" in
+                        your CI/CD pipeline.
+                    </li>
+                    <li>
+                        <strong>TestFlight Build Expiration:</strong> TestFlight builds expire after 90 days. Unlike
+                        Play Console test tracks with no expiration, you must upload new builds regularly for ongoing
+                        testing.
+                    </li>
+                    <li>
+                        <strong>App Review Surprises:</strong> Unlike Google Play's automated review, Apple has human
+                        reviewers who may notice issues that passed in previous versions. Always test thoroughly before
+                        submission.
+                    </li>
+                    <li>
+                        <strong>In-App Purchase Requirements:</strong> Digital goods and subscriptions MUST use Apple's
+                        IAP system. Attempting to use external payment for digital content will result in rejection.
+                        This is stricter than Play Store policies.
+                    </li>
+                    <li>
+                        <strong>Device Limit for Ad Hoc:</strong> You can only register 100 devices per device type
+                        (iPhone, iPad) per membership year for Ad Hoc distribution. Use TestFlight for larger beta
+                        groups instead.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Master Xcode debugger (breakpoints, LLDB, view hierarchy)</li>
+            <li>Profile with Instruments (Time Profiler, Allocations, Leaks)</li>
+            <li>Understand code signing (certificates, profiles, entitlements)</li>
+            <li>Deploy to TestFlight and invite testers</li>
+            <li>Submit to App Store with proper metadata</li>
+            <li>Set up crash reporting</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Practice the complete debugging and deployment workflow by profiling, archiving, and preparing an app for
+            TestFlight distribution.</p>
+
+        <h3>Part 1: Debugging Practice</h3>
+        <ol>
+            <li>
+                <strong>Create a sample app with performance issues:</strong>
+                <pre><code class="language-swift">struct ContentView: View {
+    @State private var items: [String] = []
+
+    var body: some View {
+        List(items, id: \.self) { item in
+            Text(item)
+        }
+        .onAppear {
+            loadItems()
+        }
+    }
+
+    func loadItems() {
+        // Intentionally slow - blocks main thread
+        for i in 0..<10000 {
+            items.append("Item \(i) - \(UUID().uuidString)")
+        }
+    }
+}</code></pre>
+            </li>
+            <li>
+                <strong>Set a breakpoint</strong> in <code>loadItems()</code> and use LLDB to:
+                <ul>
+                    <li>Print the items array: <code>po items</code></li>
+                    <li>Print the count: <code>po items.count</code></li>
+                    <li>Modify a variable: <code>expr items.append("Debug Item")</code></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Profile with Time Profiler:</strong>
+                <ul>
+                    <li>Run Product > Profile (Cmd+I)</li>
+                    <li>Select Time Profiler template</li>
+                    <li>Record the app launch and identify the slow <code>loadItems()</code> function</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Fix the performance issue:</strong>
+                <pre><code class="language-swift">func loadItems() async {
+    let newItems = await Task.detached {
+        (0..<10000).map { "Item \($0) - \(UUID().uuidString)" }
+    }.value
+    await MainActor.run {
+        items = newItems
+    }
+}</code></pre>
+            </li>
+        </ol>
+
+        <h3>Part 2: Archive and Prepare for TestFlight</h3>
+        <ol>
+            <li>
+                <strong>Configure signing:</strong>
+                <ul>
+                    <li>Open project settings > Signing & Capabilities</li>
+                    <li>Select your team (requires Apple Developer account)</li>
+                    <li>Enable "Automatically manage signing"</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Set version and build numbers:</strong>
+                <ul>
+                    <li>Version: 1.0.0 (marketing version, shown to users)</li>
+                    <li>Build: 1 (internal build number, must increment for each upload)</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Create archive:</strong>
+                <ul>
+                    <li>Select "Any iOS Device" as build target (not Simulator)</li>
+                    <li>Product > Archive</li>
+                    <li>Wait for archive to complete</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Validate and distribute:</strong>
+                <ul>
+                    <li>In Organizer, select archive and click "Validate App"</li>
+                    <li>Fix any validation errors</li>
+                    <li>Click "Distribute App" > App Store Connect</li>
+                    <li>Choose "Upload" (or "Export" for IPA file)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Part 3: Set Up Crash Reporting</h3>
+        <ol>
+            <li>
+                <strong>Add Firebase Crashlytics:</strong>
+                <pre><code class="language-swift">// In Package.swift dependencies:
+.package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.0.0")
+
+// Add to target dependencies:
+.product(name: "FirebaseCrashlytics", package: "firebase-ios-sdk")</code></pre>
+            </li>
+            <li>
+                <strong>Initialize and test:</strong>
+                <pre><code class="language-swift">import Firebase
+import FirebaseCrashlytics
+
+@main
+struct MyApp: App {
+    init() {
+        FirebaseApp.configure()
+
+        // Test crash reporting (remove before shipping!)
+        #if DEBUG
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+        #endif
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}</code></pre>
+            </li>
+            <li>
+                <strong>Add run script for dSYM upload:</strong>
+                <ul>
+                    <li>Build Phases > New Run Script Phase</li>
+                    <li>Add the Crashlytics upload script from Firebase documentation</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="callout tip">
+            <div class="callout-title">Exercise Tips</div>
+            <div class="callout-content">
+                <ul>
+                    <li>You need an Apple Developer account ($99/year) to upload to TestFlight</li>
+                    <li>You can practice archiving and validation without an account</li>
+                    <li>Use the iOS Simulator for debugging practice</li>
+                    <li>Profile on a real device for accurate performance data</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>How</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Set breakpoint</td>
+                    <td>Click line number gutter</td>
+                </tr>
+                <tr>
+                    <td>Conditional breakpoint</td>
+                    <td>Right-click breakpoint > Edit Breakpoint</td>
+                </tr>
+                <tr>
+                    <td>Exception breakpoint</td>
+                    <td>Debug > Breakpoints > Create Exception Breakpoint</td>
+                </tr>
+                <tr>
+                    <td>Print in LLDB</td>
+                    <td><code>po variableName</code></td>
+                </tr>
+                <tr>
+                    <td>View logs</td>
+                    <td>Debug Area > Console (Cmd+Shift+C)</td>
+                </tr>
+                <tr>
+                    <td>Profile app</td>
+                    <td>Product > Profile (Cmd+I)</td>
+                </tr>
+                <tr>
+                    <td>View hierarchy</td>
+                    <td>Debug > View Debugging > Capture View Hierarchy</td>
+                </tr>
+                <tr>
+                    <td>Memory graph</td>
+                    <td>Debug > Debug Workflow > View Memory Graph</td>
+                </tr>
+                <tr>
+                    <td>Archive</td>
+                    <td>Product > Archive (device target required)</td>
+                </tr>
+                <tr>
+                    <td>Validate</td>
+                    <td>Organizer > Select Archive > Validate App</td>
+                </tr>
+                <tr>
+                    <td>Upload to TestFlight</td>
+                    <td>Organizer > Distribute App > App Store Connect</td>
+                </tr>
+                <tr>
+                    <td>View crashes</td>
+                    <td>Window > Organizer > Crashes tab</td>
+                </tr>
+                <tr>
+                    <td>Regenerate profiles</td>
+                    <td>developer.apple.com > Certificates, IDs & Profiles</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References & Further Reading</h2>
+        <ul>
+            <li>
+                <a href="https://developer.apple.com/documentation/xcode/diagnosing-and-resolving-bugs-in-your-running-app"
+                   rel="noopener" target="_blank">Apple: Diagnosing and Resolving Bugs in Your Running App</a></li>
+            <li>
+                <a href="https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/debugging_with_xcode/chapters/debugging_tools.html"
+                   rel="noopener" target="_blank">Apple: Debugging with Xcode</a></li>
+            <li><a href="https://developer.apple.com/documentation/xcode/improving-your-app-s-performance"
+                   rel="noopener" target="_blank">Apple: Improving Your App's Performance (Instruments)</a></li>
+            <li><a href="https://developer.apple.com/documentation/xcode/instruments" rel="noopener" target="_blank">Apple:
+                Instruments Documentation</a></li>
+            <li>
+                <a href="https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases"
+                   rel="noopener" target="_blank">Apple: Distributing Your App for Beta Testing and Releases</a></li>
+            <li><a href="https://developer.apple.com/app-store/review/guidelines/" rel="noopener" target="_blank">App
+                Store Review Guidelines</a></li>
+            <li><a href="https://developer.apple.com/support/code-signing/" rel="noopener" target="_blank">Apple: Code
+                Signing Support</a></li>
+            <li>
+                <a href="https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution"
+                   rel="noopener" target="_blank">Apple: Code Signing Guide</a></li>
+            <li><a href="https://developer.apple.com/testflight/" rel="noopener" target="_blank">Apple: TestFlight</a>
+            </li>
+            <li><a href="https://developer.apple.com/documentation/metrickit" rel="noopener" target="_blank">Apple:
+                MetricKit Documentation</a></li>
+            <li><a href="https://firebase.google.com/docs/crashlytics/get-started?platform=ios" rel="noopener"
+                   target="_blank">Firebase Crashlytics for iOS</a></li>
+            <li><a href="https://docs.fastlane.tools/" rel="noopener" target="_blank">Fastlane Documentation</a></li>
+            <li><a href="https://developer.apple.com/design/human-interface-guidelines/" rel="noopener" target="_blank">Human
+                Interface Guidelines</a></li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="09-testing.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">Testing</span></a>
+        <a class="module-nav-link next" href="../index.html"><span class="module-nav-label">Complete!</span><span
+                class="module-nav-title">Back to Home</span></a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ruby.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

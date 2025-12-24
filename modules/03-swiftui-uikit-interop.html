@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="Build modern iOS UIs with SwiftUI and learn UIKit interoperability. Compare Jetpack Compose patterns to SwiftUI for Android developers."
+          name="description">
+    <title>SwiftUI & UIKit Interop | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/03-swiftui-uikit-interop.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="SwiftUI & UIKit Interop | iOS for Android Developers" property="og:title">
+    <meta content="Build modern iOS UIs with SwiftUI and learn UIKit interoperability for Android developers."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/03-swiftui-uikit-interop.html"
+          property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="SwiftUI & UIKit Interop | iOS for Android Developers" name="twitter:title">
+    <meta content="Build modern iOS UIs with SwiftUI and learn UIKit interoperability." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option selected value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 3</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">03</span>
+        <h1>SwiftUI & UIKit Interop</h1>
+        <p class="module-description">Build modern UIs with SwiftUI while understanding UIKit. Learn when and how to mix
+            both frameworks.</p>
+        <div class="estimated-time">Estimated time: 35 minutes</div>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Build declarative UIs with SwiftUI</li>
+            <li>Understand UIKit fundamentals for legacy code</li>
+            <li>Embed UIKit views in SwiftUI with UIViewRepresentable</li>
+            <li>Host SwiftUI views in UIKit with UIHostingController</li>
+            <li>Choose the right framework for different scenarios</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Android to iOS UI Framework Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS (SwiftUI)</th>
+                    <th>iOS (UIKit)</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Jetpack Compose</code></td>
+                    <td><code>SwiftUI</code></td>
+                    <td>-</td>
+                    <td>Both declarative, launched same year (2019)</td>
+                </tr>
+                <tr>
+                    <td><code>XML Layouts</code></td>
+                    <td>-</td>
+                    <td><code>Storyboard/XIB</code></td>
+                    <td>Visual builders, compile-time checked</td>
+                </tr>
+                <tr>
+                    <td><code>View</code></td>
+                    <td><code>View</code> (protocol)</td>
+                    <td><code>UIView</code></td>
+                    <td>SwiftUI View is a struct, UIView is a class</td>
+                </tr>
+                <tr>
+                    <td><code>RecyclerView</code></td>
+                    <td><code>List</code> / <code>LazyVStack</code></td>
+                    <td><code>UITableView</code> / <code>UICollectionView</code></td>
+                    <td>SwiftUI handles diffing automatically</td>
+                </tr>
+                <tr>
+                    <td><code>ConstraintLayout</code></td>
+                    <td>Built-in stacks</td>
+                    <td><code>Auto Layout</code></td>
+                    <td>SwiftUI uses VStack/HStack/ZStack</td>
+                </tr>
+                <tr>
+                    <td><code>Navigation Component</code></td>
+                    <td><code>NavigationStack</code></td>
+                    <td><code>UINavigationController</code></td>
+                    <td>NavigationStack is iOS 16+</td>
+                </tr>
+                <tr>
+                    <td><code>AndroidView</code></td>
+                    <td><code>UIViewRepresentable</code></td>
+                    <td>-</td>
+                    <td>Embed imperative views in declarative</td>
+                </tr>
+                <tr>
+                    <td><code>ComposeView</code></td>
+                    <td>-</td>
+                    <td><code>UIHostingController</code></td>
+                    <td>Embed declarative in imperative</td>
+                </tr>
+                <tr>
+                    <td><code>Modifier</code></td>
+                    <td><code>.modifier()</code></td>
+                    <td>-</td>
+                    <td>View modifiers chain in both</td>
+                </tr>
+                <tr>
+                    <td><code>@Composable</code></td>
+                    <td><code>var body: some View</code></td>
+                    <td>-</td>
+                    <td>Entry point for view declaration</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>SwiftUI Fundamentals</h2>
+        <p>SwiftUI is Apple's declarative UI framework, conceptually very similar to Jetpack Compose. If you're
+            comfortable with Compose, SwiftUI will feel familiar. Both frameworks:</p>
+        <ul>
+            <li>Describe UI as a function of state</li>
+            <li>Automatically diff and update views when state changes</li>
+            <li>Use composition over inheritance</li>
+            <li>Support view modifiers for styling</li>
+        </ul>
+        <p>Key difference: In SwiftUI, views are <strong>structs</strong> (value types), not classes. This means views
+            are lightweight and recreated frequently during recomposition.</p>
+
+        <h3>Basic View Structure</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose</span></div>
+                <pre><code class="language-kotlin">// Jetpack Compose
+@Composable
+fun UserCard(user: User) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .background(Color.White)
+    ) {
+        Text(
+            text = user.name,
+            style = MaterialTheme.typography.h6
+        )
+        Text(
+            text = user.email,
+            color = Color.Gray
+        )
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">// SwiftUI
+struct UserCard: View {
+    let user: User
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(user.name)
+                .font(.headline)
+            Text(user.email)
+                .foregroundColor(.gray)
+        }
+        .padding(16)
+        .background(Color.white)
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>State Management</h3>
+        <p>SwiftUI uses property wrappers for state management, similar to Compose's state delegates:</p>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose</span></div>
+                <pre><code class="language-kotlin">@Composable
+fun Counter() {
+    var count by remember { mutableStateOf(0) }
+
+    Button(onClick = { count++ }) {
+        Text("Count: $count")
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">struct Counter: View {
+    @State private var count = 0
+
+    var body: some View {
+        Button("Count: \(count)") {
+            count += 1
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>SwiftUI Property Wrappers</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>SwiftUI</th>
+                    <th>Compose Equivalent</th>
+                    <th>Use Case</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>@State</code></td>
+                    <td><code>remember { mutableStateOf() }</code></td>
+                    <td>Local view state</td>
+                </tr>
+                <tr>
+                    <td><code>@Binding</code></td>
+                    <td><code>MutableState&lt;T&gt;</code> parameter</td>
+                    <td>Two-way binding to parent state</td>
+                </tr>
+                <tr>
+                    <td><code>@ObservedObject</code></td>
+                    <td>ViewModel with <code>collectAsState()</code></td>
+                    <td>External observable object</td>
+                </tr>
+                <tr>
+                    <td><code>@StateObject</code></td>
+                    <td><code>viewModel()</code></td>
+                    <td>Own and observe object lifecycle</td>
+                </tr>
+                <tr>
+                    <td><code>@EnvironmentObject</code></td>
+                    <td><code>CompositionLocal</code></td>
+                    <td>Dependency injection through view tree</td>
+                </tr>
+                <tr>
+                    <td><code>@Environment</code></td>
+                    <td><code>LocalContext.current</code></td>
+                    <td>System-provided values (theme, locale)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Use <code>@State</code> for simple local state (primitives, structs). Use <code>@StateObject</code>
+                    for complex objects you create. Use <code>@ObservedObject</code> for objects passed from a parent.
+                    Getting this wrong causes subtle bugs where state resets unexpectedly.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>UIKit Fundamentals</h2>
+        <p>UIKit is Apple's imperative UI framework, analogous to Android's View system with XML layouts. While SwiftUI
+            is the future, you'll encounter UIKit in:</p>
+        <ul>
+            <li>Legacy codebases (most production apps)</li>
+            <li>Features not yet available in SwiftUI</li>
+            <li>Complex custom views requiring fine-grained control</li>
+            <li>Third-party libraries</li>
+        </ul>
+
+        <h3>View Hierarchy</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Android XML</span></div>
+                <pre><code class="language-xml">&lt;LinearLayout
+    android:orientation="vertical"
+    android:padding="16dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/nameText"
+        android:textAppearance="?textAppearanceHeadline6"/&gt;
+
+    &lt;TextView
+        android:id="@+id/emailText"
+        android:textColor="@color/gray"/&gt;
+
+&lt;/LinearLayout&gt;</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">UIKit Programmatic</span></div>
+                <pre><code class="language-swift">class UserCardView: UIView {
+    let nameLabel = UILabel()
+    let emailLabel = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+    }
+
+    private func setupViews() {
+        let stack = UIStackView(arrangedSubviews: [
+            nameLabel, emailLabel
+        ])
+        stack.axis = .vertical
+        stack.spacing = 4
+        addSubview(stack)
+        // Auto Layout constraints...
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>UIViewController vs Activity/Fragment</h3>
+        <p>In UIKit, <code>UIViewController</code> is the primary building block, similar to Android's Fragment (not
+            Activity). Key differences:</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Concept</th>
+                    <th>Android</th>
+                    <th>UIKit</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Screen controller</td>
+                    <td><code>Activity</code> / <code>Fragment</code></td>
+                    <td><code>UIViewController</code></td>
+                </tr>
+                <tr>
+                    <td>View inflation</td>
+                    <td><code>setContentView()</code> / <code>onCreateView()</code></td>
+                    <td><code>loadView()</code> / <code>viewDidLoad()</code></td>
+                </tr>
+                <tr>
+                    <td>View reference</td>
+                    <td><code>findViewById()</code> / View Binding</td>
+                    <td><code>@IBOutlet</code> / property</td>
+                </tr>
+                <tr>
+                    <td>Lifecycle start</td>
+                    <td><code>onStart()</code></td>
+                    <td><code>viewWillAppear()</code></td>
+                </tr>
+                <tr>
+                    <td>Lifecycle visible</td>
+                    <td><code>onResume()</code></td>
+                    <td><code>viewDidAppear()</code></td>
+                </tr>
+                <tr>
+                    <td>Lifecycle pause</td>
+                    <td><code>onPause()</code></td>
+                    <td><code>viewWillDisappear()</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Auto Layout vs ConstraintLayout</h3>
+        <p>Auto Layout is iOS's constraint-based layout system, conceptually identical to ConstraintLayout:</p>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">ConstraintLayout</span></div>
+                <pre><code class="language-xml">app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+android:layout_marginTop="16dp"</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Auto Layout</span></div>
+                <pre><code class="language-swift">NSLayoutConstraint.activate([
+    view.topAnchor.constraint(
+        equalTo: superview.topAnchor,
+        constant: 16
+    ),
+    view.leadingAnchor.constraint(
+        equalTo: superview.leadingAnchor
+    ),
+    view.trailingAnchor.constraint(
+        equalTo: superview.trailingAnchor
+    )
+])</code></pre>
+            </div>
+        </div>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>UIKit's Interface Builder (Storyboards/XIBs) is like Android's XML Layout Editor. Both are visual
+                    designers that generate constraint-based layouts. The main difference: Storyboards can also define
+                    navigation flow and segues between screens, similar to Navigation Component's nav_graph.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>UIViewRepresentable: UIKit in SwiftUI</h2>
+        <p><code>UIViewRepresentable</code> lets you embed UIKit views in SwiftUI, exactly like Compose's <code>AndroidView</code>.
+            This is essential for:</p>
+        <ul>
+            <li>Using UIKit components without SwiftUI equivalents (e.g., <code>MKMapView</code>, <code>WKWebView</code>)
+            </li>
+            <li>Integrating third-party UIKit libraries</li>
+            <li>Reusing existing UIKit custom views</li>
+        </ul>
+
+        <h3>Basic Implementation</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose AndroidView</span></div>
+                <pre><code class="language-kotlin">@Composable
+fun WebViewWrapper(url: String) {
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+            }
+        },
+        update = { webView ->
+            webView.loadUrl(url)
+        }
+    )
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">struct WebViewWrapper: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context)
+        -> WKWebView {
+        WKWebView()
+    }
+
+    func updateUIView(_ webView: WKWebView,
+                      context: Context) {
+        webView.load(URLRequest(url: url))
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Handling Delegates with Coordinator</h3>
+        <p>UIKit uses the delegate pattern extensively. In SwiftUI, you handle delegates using a
+            <code>Coordinator</code>:</p>
+        <pre><code class="language-swift">struct MapView: UIViewRepresentable {
+    @Binding var selectedLocation: CLLocationCoordinate2D?
+
+    func makeUIView(context: Context) -> MKMapView {
+        let mapView = MKMapView()
+        mapView.delegate = context.coordinator
+        return mapView
+    }
+
+    func updateUIView(_ mapView: MKMapView, context: Context) {
+        // Update map if needed
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, MKMapViewDelegate {
+        var parent: MapView
+
+        init(_ parent: MapView) {
+            self.parent = parent
+        }
+
+        func mapView(_ mapView: MKMapView,
+                     didSelect view: MKAnnotationView) {
+            parent.selectedLocation = view.annotation?.coordinate
+        }
+    }
+}</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>The Coordinator pattern is similar to how you'd handle callbacks in <code>AndroidView</code>—you
+                    capture the Compose state and update it from the View's listeners. The key difference is iOS
+                    formalizes this with the <code>Coordinator</code> class and <code>makeCoordinator()</code> lifecycle
+                    method.</p>
+            </div>
+        </div>
+
+        <h3>UIViewControllerRepresentable</h3>
+        <p>For embedding entire <code>UIViewController</code>s (not just views), use
+            <code>UIViewControllerRepresentable</code>:</p>
+        <pre><code class="language-swift">struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.dismiss) var dismiss
+
+    func makeUIViewController(context: Context)
+        -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ picker: UIImagePickerController,
+                                context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject,
+        UIImagePickerControllerDelegate,
+        UINavigationControllerDelegate {
+        let parent: ImagePicker
+
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+
+        func imagePickerController(
+            _ picker: UIImagePickerController,
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+        ) {
+            parent.selectedImage = info[.originalImage] as? UIImage
+            parent.dismiss()
+        }
+    }
+}</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>UIHostingController: SwiftUI in UIKit</h2>
+        <p><code>UIHostingController</code> is the reverse of <code>UIViewRepresentable</code>—it lets you embed SwiftUI
+            views in UIKit apps. This is equivalent to Compose's <code>ComposeView</code>. It's essential for:</p>
+        <ul>
+            <li>Incrementally adopting SwiftUI in existing UIKit apps</li>
+            <li>Using SwiftUI components in UIKit navigation</li>
+            <li>Mixing SwiftUI screens with UIKit screens</li>
+        </ul>
+
+        <h3>Basic Usage</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose ComposeView</span></div>
+                <pre><code class="language-kotlin">// In Activity or Fragment
+val composeView = ComposeView(context).apply {
+    setContent {
+        MaterialTheme {
+            UserProfileScreen(userId = userId)
+        }
+    }
+}
+containerView.addView(composeView)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">UIKit</span></div>
+                <pre><code class="language-swift">// In UIViewController
+let swiftUIView = UserProfileView(userId: userId)
+let hostingController = UIHostingController(
+    rootView: swiftUIView
+)
+
+addChild(hostingController)
+view.addSubview(hostingController.view)
+hostingController.didMove(toParent: self)
+
+// Don't forget Auto Layout constraints
+hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+NSLayoutConstraint.activate([
+    hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+    hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+    hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+    hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+])</code></pre>
+            </div>
+        </div>
+
+        <h3>Navigation: Pushing SwiftUI from UIKit</h3>
+        <pre><code class="language-swift">class ProductListViewController: UIViewController {
+    func showProductDetail(productId: String) {
+        let detailView = ProductDetailView(productId: productId)
+        let hostingController = UIHostingController(rootView: detailView)
+        navigationController?.pushViewController(hostingController, animated: true)
+    }
+}</code></pre>
+
+        <h3>Presenting SwiftUI Modally</h3>
+        <pre><code class="language-swift">func showSettings() {
+    let settingsView = SettingsView()
+    let hostingController = UIHostingController(rootView: settingsView)
+
+    // Full screen
+    hostingController.modalPresentationStyle = .fullScreen
+    present(hostingController, animated: true)
+
+    // Or as a sheet (default on iOS 13+)
+    // present(hostingController, animated: true)
+}</code></pre>
+
+        <h3>Passing Data Back to UIKit</h3>
+        <p>Use closures or delegates to communicate from SwiftUI back to UIKit:</p>
+        <pre><code class="language-swift">// SwiftUI View
+struct FilterView: View {
+    let onApply: (FilterOptions) -> Void
+
+    var body: some View {
+        Button("Apply") {
+            onApply(selectedFilters)
+        }
+    }
+}
+
+// UIKit ViewController
+func showFilters() {
+    let filterView = FilterView { [weak self] options in
+        self?.applyFilters(options)
+        self?.dismiss(animated: true)
+    }
+    let hostingController = UIHostingController(rootView: filterView)
+    present(hostingController, animated: true)
+}</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>When embedding <code>UIHostingController</code> as a child, always follow the view controller
+                    containment pattern: <code>addChild()</code>, add view, then <code>didMove(toParent:)</code>.
+                    Forgetting this causes lifecycle issues.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Navigation Patterns</h2>
+        <p>Navigation in iOS has evolved significantly. SwiftUI's <code>NavigationStack</code> (iOS 16+) is the modern
+            approach, similar to Compose's Navigation Component with type-safe routes.</p>
+
+        <h3>SwiftUI NavigationStack (iOS 16+)</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose Navigation</span></div>
+                <pre><code class="language-kotlin">NavHost(navController, startDestination = "home") {
+    composable("home") { HomeScreen() }
+    composable("detail/{id}") { backStackEntry ->
+        val id = backStackEntry.arguments?.getString("id")
+        DetailScreen(id = id)
+    }
+}
+
+// Navigate
+navController.navigate("detail/$productId")</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">NavigationStack {
+    HomeView()
+        .navigationDestination(for: Product.self) { product in
+            ProductDetailView(product: product)
+        }
+}
+
+// Navigate (in HomeView)
+NavigationLink(value: product) {
+    ProductRow(product: product)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Navigation with Path State</h3>
+        <pre><code class="language-swift">struct ContentView: View {
+    @State private var path = NavigationPath()
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            HomeView()
+                .navigationDestination(for: Product.self) { product in
+                    ProductDetailView(product: product)
+                }
+                .navigationDestination(for: Category.self) { category in
+                    CategoryView(category: category)
+                }
+        }
+    }
+
+    // Programmatic navigation
+    func navigateToProduct(_ product: Product) {
+        path.append(product)
+    }
+
+    // Pop to root
+    func popToRoot() {
+        path = NavigationPath()
+    }
+}</code></pre>
+
+        <h3>Sheet and Full Screen Cover</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Compose</span></div>
+                <pre><code class="language-kotlin">var showSheet by remember { mutableStateOf(false) }
+
+if (showSheet) {
+    ModalBottomSheet(
+        onDismissRequest = { showSheet = false }
+    ) {
+        SheetContent()
+    }
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">SwiftUI</span></div>
+                <pre><code class="language-swift">@State private var showSheet = false
+
+Button("Show Sheet") {
+    showSheet = true
+}
+.sheet(isPresented: $showSheet) {
+    SheetContent()
+}
+
+// Full screen (no dismiss gesture)
+.fullScreenCover(isPresented: $showFullScreen) {
+    FullScreenContent()
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>UIKit Navigation (Legacy)</h3>
+        <pre><code class="language-swift">// Push navigation
+navigationController?.pushViewController(detailVC, animated: true)
+
+// Pop back
+navigationController?.popViewController(animated: true)
+
+// Pop to root
+navigationController?.popToRootViewController(animated: true)
+
+// Modal presentation
+present(settingsVC, animated: true)
+dismiss(animated: true)</code></pre>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p>Don't mix SwiftUI and UIKit navigation in the same flow. If your app uses <code>UINavigationController</code>,
+                    push <code>UIHostingController</code> instances. If using <code>NavigationStack</code>, wrap UIKit
+                    views with <code>UIViewControllerRepresentable</code>. Mixing causes broken back gestures and state
+                    inconsistencies.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>When to Use Which Framework</h2>
+        <p>Choosing between SwiftUI and UIKit depends on your project constraints, minimum iOS version, and specific
+            feature requirements.</p>
+
+        <h3>Decision Matrix</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Recommendation</th>
+                    <th>Reason</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>New app, iOS 15+ target</td>
+                    <td>SwiftUI-first</td>
+                    <td>Full SwiftUI feature set available</td>
+                </tr>
+                <tr>
+                    <td>New app, iOS 13/14 target</td>
+                    <td>SwiftUI + UIKit bridges</td>
+                    <td>Missing NavigationStack, some APIs</td>
+                </tr>
+                <tr>
+                    <td>Existing UIKit app</td>
+                    <td>Gradual SwiftUI adoption</td>
+                    <td>Use UIHostingController for new screens</td>
+                </tr>
+                <tr>
+                    <td>Complex custom animations</td>
+                    <td>UIKit or Core Animation</td>
+                    <td>More control than SwiftUI animations</td>
+                </tr>
+                <tr>
+                    <td>Camera/video capture</td>
+                    <td>UIKit (AVFoundation)</td>
+                    <td>SwiftUI lacks native camera APIs</td>
+                </tr>
+                <tr>
+                    <td>Maps with custom overlays</td>
+                    <td>UIKit (MapKit) wrapped</td>
+                    <td>SwiftUI Map limited in customization</td>
+                </tr>
+                <tr>
+                    <td>Simple forms/lists</td>
+                    <td>SwiftUI</td>
+                    <td>Dramatically less code</td>
+                </tr>
+                <tr>
+                    <td>Accessibility-critical</td>
+                    <td>Either (both mature)</td>
+                    <td>Both have full accessibility support</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>SwiftUI Strengths</h3>
+        <ul>
+            <li><strong>Declarative syntax</strong>: Describe what, not how</li>
+            <li><strong>Less code</strong>: Often 50-70% less than UIKit</li>
+            <li><strong>Live previews</strong>: See changes instantly in Xcode</li>
+            <li><strong>Cross-platform</strong>: Same code for iOS, macOS, watchOS, tvOS</li>
+            <li><strong>Automatic animations</strong>: Built-in animation support</li>
+            <li><strong>State management</strong>: Reactive updates built-in</li>
+        </ul>
+
+        <h3>UIKit Strengths</h3>
+        <ul>
+            <li><strong>Mature ecosystem</strong>: 15+ years of libraries and solutions</li>
+            <li><strong>Fine-grained control</strong>: Direct access to view lifecycle</li>
+            <li><strong>Complex layouts</strong>: Collection view compositional layouts</li>
+            <li><strong>Performance tuning</strong>: Precise control over rendering</li>
+            <li><strong>Third-party libraries</strong>: Most still UIKit-based</li>
+        </ul>
+
+        <h3>Common Pitfalls</h3>
+        <ul class="pitfalls-list">
+            <li><strong>Using @ObservedObject instead of @StateObject</strong>: Causes object recreation on every view
+                update. Use @StateObject for objects you create, @ObservedObject for objects passed in.
+            </li>
+            <li><strong>Forgetting to set translatesAutoresizingMaskIntoConstraints = false</strong>: UIKit views added
+                programmatically need this disabled before adding Auto Layout constraints.
+            </li>
+            <li><strong>Not handling Coordinator lifecycle</strong>: Coordinators in UIViewRepresentable can become
+                stale. Update parent reference if needed.
+            </li>
+            <li><strong>Mixing NavigationView and NavigationStack</strong>: NavigationView is deprecated in iOS 16. Use
+                NavigationStack for new code, but don't mix them.
+            </li>
+            <li><strong>Over-using @State</strong>: For complex objects, use @StateObject with ObservableObject. @State
+                is for simple values.
+            </li>
+            <li><strong>Not understanding view identity</strong>: SwiftUI uses structural identity. Changing a view's
+                position in the hierarchy recreates it.
+            </li>
+            <li><strong>Ignoring minimum deployment target</strong>: Many SwiftUI APIs are iOS 15+ or 16+. Always check
+                availability.
+            </li>
+        </ul>
+
+        <div class="callout compare">
+            <div class="callout-title">Industry Pattern: Strangler Fig Migration</div>
+            <div class="callout-content">
+                <p>Most production iOS apps migrate from UIKit to SwiftUI using the <strong>Strangler Fig
+                    pattern</strong>—the same approach used for Compose adoption on Android. New features use SwiftUI
+                    via <code>UIHostingController</code>, while existing UIKit screens remain untouched. Over time,
+                    SwiftUI "strangles" the UIKit codebase as screens are rewritten. This avoids big-bang rewrites while
+                    gaining SwiftUI benefits incrementally.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Build basic SwiftUI views</li>
+            <li>Understand UIKit structure</li>
+            <li>Use UIViewRepresentable</li>
+            <li>Use UIHostingController</li>
+            <li>Implement navigation</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a simple app that demonstrates SwiftUI/UIKit interoperability. You'll create a contact list using
+            SwiftUI and integrate a UIKit-based detail view.</p>
+        <ol>
+            <li><strong>Create a SwiftUI List</strong>: Build a <code>ContactListView</code> displaying a list of
+                contacts using SwiftUI's <code>List</code> and <code>NavigationStack</code>.
+            </li>
+            <li><strong>Wrap UIKit Detail View</strong>: Create a <code>UIViewController</code> subclass called <code>ContactDetailViewController</code>
+                that shows contact details. Wrap it using <code>UIViewControllerRepresentable</code>.
+            </li>
+            <li><strong>Navigate from SwiftUI to UIKit</strong>: Use <code>NavigationLink</code> to push the wrapped
+                UIKit view controller when a contact is tapped.
+            </li>
+            <li><strong>Add Coordinator for Callbacks</strong>: Implement a Coordinator that handles a "Call" button tap
+                in the UIKit view and communicates back to SwiftUI.
+            </li>
+            <li><strong>Bonus</strong>: Add a SwiftUI sheet presented from the UIKit view using <code>UIHostingController</code>.
+            </li>
+        </ol>
+        <div class="callout tip">
+            <div class="callout-title">Exercise Tip</div>
+            <div class="callout-content">
+                <p>Start with the SwiftUI list working standalone, then incrementally add the UIKit integration. Use
+                    Xcode's Preview to iterate quickly on the SwiftUI parts.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+
+        <h3>SwiftUI to UIKit Component Mapping</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>SwiftUI</th>
+                    <th>UIKit Equivalent</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Text</code></td>
+                    <td><code>UILabel</code></td>
+                </tr>
+                <tr>
+                    <td><code>Button</code></td>
+                    <td><code>UIButton</code></td>
+                </tr>
+                <tr>
+                    <td><code>TextField</code></td>
+                    <td><code>UITextField</code></td>
+                </tr>
+                <tr>
+                    <td><code>TextEditor</code></td>
+                    <td><code>UITextView</code></td>
+                </tr>
+                <tr>
+                    <td><code>Toggle</code></td>
+                    <td><code>UISwitch</code></td>
+                </tr>
+                <tr>
+                    <td><code>Slider</code></td>
+                    <td><code>UISlider</code></td>
+                </tr>
+                <tr>
+                    <td><code>Picker</code></td>
+                    <td><code>UIPickerView</code> / <code>UISegmentedControl</code></td>
+                </tr>
+                <tr>
+                    <td><code>List</code></td>
+                    <td><code>UITableView</code></td>
+                </tr>
+                <tr>
+                    <td><code>ScrollView</code></td>
+                    <td><code>UIScrollView</code></td>
+                </tr>
+                <tr>
+                    <td><code>LazyVGrid</code> / <code>LazyHGrid</code></td>
+                    <td><code>UICollectionView</code></td>
+                </tr>
+                <tr>
+                    <td><code>NavigationStack</code></td>
+                    <td><code>UINavigationController</code></td>
+                </tr>
+                <tr>
+                    <td><code>TabView</code></td>
+                    <td><code>UITabBarController</code></td>
+                </tr>
+                <tr>
+                    <td><code>.sheet()</code></td>
+                    <td><code>present(_:animated:)</code></td>
+                </tr>
+                <tr>
+                    <td><code>.alert()</code></td>
+                    <td><code>UIAlertController</code></td>
+                </tr>
+                <tr>
+                    <td><code>Image</code></td>
+                    <td><code>UIImageView</code></td>
+                </tr>
+                <tr>
+                    <td><code>AsyncImage</code></td>
+                    <td>Third-party (SDWebImage, Kingfisher)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>State Property Wrappers</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Wrapper</th>
+                    <th>Use When</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>@State</code></td>
+                    <td>Simple local value owned by this view</td>
+                </tr>
+                <tr>
+                    <td><code>@Binding</code></td>
+                    <td>Reference to parent's state (two-way)</td>
+                </tr>
+                <tr>
+                    <td><code>@StateObject</code></td>
+                    <td>You create an ObservableObject</td>
+                </tr>
+                <tr>
+                    <td><code>@ObservedObject</code></td>
+                    <td>Parent passes an ObservableObject</td>
+                </tr>
+                <tr>
+                    <td><code>@EnvironmentObject</code></td>
+                    <td>Shared object via view hierarchy</td>
+                </tr>
+                <tr>
+                    <td><code>@Environment</code></td>
+                    <td>System values (colorScheme, dismiss)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Interop Quick Reference</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Code</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>UIKit view in SwiftUI</td>
+                    <td><code>struct MyView: UIViewRepresentable</code></td>
+                </tr>
+                <tr>
+                    <td>UIKit VC in SwiftUI</td>
+                    <td><code>struct MyVC: UIViewControllerRepresentable</code></td>
+                </tr>
+                <tr>
+                    <td>SwiftUI in UIKit</td>
+                    <td><code>UIHostingController(rootView: myView)</code></td>
+                </tr>
+                <tr>
+                    <td>Handle UIKit delegates</td>
+                    <td>Implement <code>makeCoordinator()</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References and Further Reading</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/swiftui" rel="noopener" target="_blank">Apple SwiftUI
+                Documentation</a> - Official SwiftUI framework reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/uikit" rel="noopener" target="_blank">Apple UIKit
+                Documentation</a> - Official UIKit framework reference
+            </li>
+            <li><a href="https://developer.apple.com/documentation/swiftui/uiviewrepresentable" rel="noopener"
+                   target="_blank">UIViewRepresentable Protocol</a> - Embedding UIKit views in SwiftUI
+            </li>
+            <li><a href="https://developer.apple.com/documentation/swiftui/uihostingcontroller" rel="noopener"
+                   target="_blank">UIHostingController</a> - Hosting SwiftUI in UIKit
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2019/216/" rel="noopener" target="_blank">WWDC19:
+                SwiftUI Essentials</a> - Introduction to SwiftUI concepts
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2022/10054/" rel="noopener" target="_blank">WWDC22:
+                The SwiftUI cookbook for navigation</a> - NavigationStack deep dive
+            </li>
+            <li><a href="https://github.com/pointfreeco/swift-composable-architecture" rel="noopener" target="_blank">The
+                Composable Architecture (TCA)</a> - Popular SwiftUI architecture pattern (similar to MVI)
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="02-swift-for-kotlin.html"><span
+                class="module-nav-label">Previous</span><span class="module-nav-title">Swift for Kotlin Devs</span></a>
+        <a class="module-nav-link next" href="04-architecture-state.html"><span
+                class="module-nav-label">Next</span><span class="module-nav-title">Architecture & State</span></a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

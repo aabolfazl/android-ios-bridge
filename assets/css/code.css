@@ -1,0 +1,314 @@
+/* ========================================
+   Code Block Styling
+   iOS for Android Developers - Skill Bridge
+   ======================================== */
+
+/* Inline Code */
+code {
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875em;
+    background-color: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    word-break: break-word;
+}
+
+/* Code Blocks */
+pre {
+    background-color: var(--code-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--border);
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    display: block;
+    white-space: pre;
+}
+
+/* Code Block with Language Label */
+.code-block {
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-tertiary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+}
+
+.code-block-lang {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.code-block-copy {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.code-block-copy:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.code-block pre {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Line Numbers */
+.code-with-lines {
+    counter-reset: line;
+}
+
+.code-with-lines .line {
+    display: block;
+    position: relative;
+    padding-left: 3.5rem;
+}
+
+.code-with-lines .line::before {
+    counter-increment: line;
+    content: counter(line);
+    position: absolute;
+    left: 0;
+    width: 2.5rem;
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    user-select: none;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+    margin-right: 1rem;
+}
+
+/* Syntax Highlighting (Basic) */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: var(--text-secondary);
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+    color: #bf5af2; /* Purple */
+}
+
+[data-theme="light"] .token.property,
+[data-theme="light"] .token.tag,
+[data-theme="light"] .token.boolean,
+[data-theme="light"] .token.number,
+[data-theme="light"] .token.constant,
+[data-theme="light"] .token.symbol {
+    color: #9d38bd;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+    color: #30d158; /* Green */
+}
+
+[data-theme="light"] .token.selector,
+[data-theme="light"] .token.attr-name,
+[data-theme="light"] .token.string,
+[data-theme="light"] .token.char,
+[data-theme="light"] .token.builtin {
+    color: #248a3d;
+}
+
+.token.operator,
+.token.entity,
+.token.url {
+    color: var(--text-secondary);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #ff375f; /* Pink/Red */
+}
+
+[data-theme="light"] .token.atrule,
+[data-theme="light"] .token.attr-value,
+[data-theme="light"] .token.keyword {
+    color: #d70015;
+}
+
+.token.function,
+.token.class-name {
+    color: #64d2ff; /* Cyan */
+}
+
+[data-theme="light"] .token.function,
+[data-theme="light"] .token.class-name {
+    color: #0071e3;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #ffd60a; /* Yellow */
+}
+
+[data-theme="light"] .token.regex,
+[data-theme="light"] .token.important,
+[data-theme="light"] .token.variable {
+    color: #b25000;
+}
+
+/* Code Comparison (Side by Side) */
+.code-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.code-compare-block {
+    min-width: 0;
+}
+
+.code-compare-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.code-compare-label .platform-android {
+    color: #30d158;
+}
+
+.code-compare-label .platform-ios {
+    color: #ff375f;
+}
+
+.code-compare pre {
+    margin: 0;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .code-compare {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Highlighted Lines */
+.line.highlighted {
+    background-color: var(--nav-active-bg);
+    margin: 0 -1rem;
+    padding-left: calc(3.5rem + 1rem);
+    padding-right: 1rem;
+}
+
+/* Diff Styling */
+.line.added {
+    background-color: rgba(48, 209, 88, 0.15);
+}
+
+.line.removed {
+    background-color: rgba(255, 55, 95, 0.15);
+}
+
+.line.added::after,
+.line.removed::after {
+    position: absolute;
+    left: 3rem;
+    font-weight: bold;
+}
+
+.line.added::after {
+    content: '+';
+    color: #30d158;
+}
+
+.line.removed::after {
+    content: '-';
+    color: #ff375f;
+}
+
+/* Code in Tables */
+td code {
+    font-size: 0.8em;
+}
+
+/* Terminal/Shell Output */
+.terminal {
+    background-color: #1c1c1e;
+    color: #f5f5f7;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.terminal-prompt {
+    color: #30d158;
+}
+
+.terminal-output {
+    color: #a1a1a6;
+}
+
+/* Filename Header */
+.code-filename {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--bg-tertiary);
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px 6px 0 0;
+    font-size: 0.8rem;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 1;
+}
+
+.code-filename + pre {
+    border-top-left-radius: 0;
+}

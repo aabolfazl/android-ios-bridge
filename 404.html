@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="noindex, nofollow" name="robots">
+    <title>Page Not Found | iOS for Android Developers</title>
+    <meta content="The page you're looking for doesn't exist. Return to the iOS for Android Developers skill bridge."
+          name="description">
+    <link href="https://aabolfazl.github.io/android-ios-bridge/" rel="canonical">
+    <link href="assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="assets/img/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+    <meta content="#0d1117" name="theme-color">
+    <link href="assets/css/styles.css" rel="stylesheet">
+    <style>
+        .error-page {
+            min-height: calc(100vh - var(--header-height) - 8rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .error-code {
+            font-size: clamp(4rem, 15vw, 8rem);
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1;
+            margin-bottom: 1rem;
+            letter-spacing: -0.05em;
+        }
+
+        .error-title {
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .error-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: opacity 0.15s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            color: var(--bg-primary);
+        }
+
+        .module-links {
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .module-links-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .module-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .module-links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .module-link {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .module-link:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">&#9684;</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main">
+    <div class="error-page">
+        <div class="error-code">404</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-message">The page you're looking for doesn't exist or has been moved. Let's get you back on
+            track.</p>
+
+        <div class="error-actions">
+            <a class="btn-primary" href="index.html">
+                <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Go to Home
+            </a>
+        </div>
+
+        <div class="module-links">
+            <div class="module-links-title">Or jump to a module</div>
+            <div class="module-links-grid">
+                <a class="module-link" href="modules/01-mindset-lifecycle.html">01 Mindset & Lifecycle</a>
+                <a class="module-link" href="modules/02-swift-for-kotlin.html">02 Swift for Kotlin</a>
+                <a class="module-link" href="modules/03-swiftui-uikit-interop.html">03 SwiftUI & UIKit</a>
+                <a class="module-link" href="modules/04-architecture-state.html">04 Architecture</a>
+                <a class="module-link" href="modules/05-concurrency.html">05 Concurrency</a>
+                <a class="module-link" href="modules/06-networking.html">06 Networking</a>
+                <a class="module-link" href="modules/07-persistence.html">07 Persistence</a>
+                <a class="module-link" href="modules/08-di-spm.html">08 DI & SPM</a>
+                <a class="module-link" href="modules/09-testing.html">09 Testing</a>
+                <a class="module-link" href="modules/10-debugging-shipping.html">10 Shipping</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Theme toggle
+    (function () {
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        if (themeBtn) {
+            themeBtn.addEventListener('click', function () {
+                const current = html.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+            });
+        }
+    })();
+</script>
+</body>
+</html>

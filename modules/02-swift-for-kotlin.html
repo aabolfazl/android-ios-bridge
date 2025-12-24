@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="Learn Swift quickly by leveraging your Kotlin knowledge. Optionals, protocols, generics, closures, and syntax differences explained."
+          name="description">
+    <title>Swift for Kotlin Developers | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/02-swift-for-kotlin.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="Swift for Kotlin Developers | iOS for Android Developers" property="og:title">
+    <meta content="Learn Swift quickly by leveraging your Kotlin knowledge. Optionals, protocols, and syntax differences."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/02-swift-for-kotlin.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="Swift for Kotlin Developers | iOS for Android Developers" name="twitter:title">
+    <meta content="Learn Swift quickly by leveraging your Kotlin knowledge." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option selected value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 2</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">02</span>
+        <h1>Swift for Kotlin Developers</h1>
+        <p class="module-description">Leverage your Kotlin knowledge to learn Swift fast. Optionals, protocols,
+            generics, and key syntax differences.</p>
+        <span class="estimated-time">Estimated time: ~30 minutes</span>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>You will be able to read and write Swift code fluently by mapping Kotlin syntax patterns to their Swift
+                equivalents
+            </li>
+            <li>You will be able to handle optionals safely using Swift's optional chaining, nil-coalescing, and guard
+                statements
+            </li>
+            <li>You will be able to leverage Swift-specific features like protocols with associated types, value types,
+                and powerful enums
+            </li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Kotlin to Swift Syntax Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Kotlin</th>
+                    <th>Swift</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>val</code></td>
+                    <td><code>let</code></td>
+                    <td>Immutable binding. Swift's <code>let</code> is deeply immutable for value types.</td>
+                </tr>
+                <tr>
+                    <td><code>var</code></td>
+                    <td><code>var</code></td>
+                    <td>Mutable binding. Same keyword, same semantics.</td>
+                </tr>
+                <tr>
+                    <td><code>fun</code></td>
+                    <td><code>func</code></td>
+                    <td>Function declaration. Swift requires explicit return type after <code>-></code>.</td>
+                </tr>
+                <tr>
+                    <td><code>String?</code></td>
+                    <td><code>String?</code></td>
+                    <td>Optional type. Same syntax, but Swift uses <code>nil</code> instead of <code>null</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>interface</code></td>
+                    <td><code>protocol</code></td>
+                    <td>Swift protocols are more powerful with associated types and protocol extensions.</td>
+                </tr>
+                <tr>
+                    <td><code>data class</code></td>
+                    <td><code>struct</code></td>
+                    <td>Swift structs are value types with automatic <code>Equatable</code> synthesis.</td>
+                </tr>
+                <tr>
+                    <td><code>sealed class</code></td>
+                    <td><code>enum</code> with associated values</td>
+                    <td>Swift enums can hold associated data per case. More powerful than Kotlin sealed.</td>
+                </tr>
+                <tr>
+                    <td><code>object</code></td>
+                    <td><code>static</code> members / <code>class</code> with private init</td>
+                    <td>No direct equivalent. Use static members or singleton pattern.</td>
+                </tr>
+                <tr>
+                    <td><code>companion object</code></td>
+                    <td><code>static</code></td>
+                    <td>Swift uses <code>static</code> for type-level members. No companion object concept.</td>
+                </tr>
+                <tr>
+                    <td><code>typealias</code></td>
+                    <td><code>typealias</code></td>
+                    <td>Same keyword, same purpose.</td>
+                </tr>
+                <tr>
+                    <td><code>when</code></td>
+                    <td><code>switch</code></td>
+                    <td>Swift switch is exhaustive by default and requires no <code>break</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>is</code> / <code>as</code> / <code>as?</code></td>
+                    <td><code>is</code> / <code>as!</code> / <code>as?</code></td>
+                    <td>Similar type checking and casting. Swift uses <code>as!</code> for force cast.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Basic Syntax Comparison</h2>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Variables
+val name: String = "Alice"
+var age = 30 // Type inference
+
+// Functions
+fun greet(name: String): String {
+    return "Hello, $name"
+}
+
+// Single expression
+fun double(x: Int) = x * 2
+
+// Default parameters
+fun connect(
+    host: String,
+    port: Int = 8080
+) { }
+
+// Named arguments
+connect(host = "api.example.com")</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Variables
+let name: String = "Alice"
+var age = 30 // Type inference
+
+// Functions
+func greet(name: String) -> String {
+    return "Hello, \(name)"
+}
+
+// Single expression (still needs return)
+func double(_ x: Int) -> Int { x * 2 }
+
+// Default parameters
+func connect(
+    host: String,
+    port: Int = 8080
+) { }
+
+// Named arguments (required by default)
+connect(host: "api.example.com")</code></pre>
+            </div>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">Argument Labels</div>
+            <div class="callout-content">
+                <p>Swift requires argument labels by default. Use <code>_</code> to omit: <code>func double(_ x:
+                    Int)</code>. This is opposite to Kotlin where labels are optional.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Optionals & Null Safety</h2>
+        <p>Both languages have null safety, but the mechanisms differ slightly:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Nullable type
+val name: String? = null
+
+// Safe call
+val length = name?.length
+
+// Elvis operator
+val len = name?.length ?: 0
+
+// Not-null assertion (dangerous)
+val len2 = name!!.length
+
+// Smart cast
+if (name != null) {
+    println(name.length) // Smart cast
+}
+
+// let scope function
+name?.let {
+    println(it.length)
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Optional type
+let name: String? = nil
+
+// Optional chaining
+let length = name?.count
+
+// Nil-coalescing operator
+let len = name?.count ?? 0
+
+// Force unwrap (dangerous)
+let len2 = name!.count
+
+// Optional binding
+if let name = name {
+    print(name.count) // Unwrapped
+}
+
+// guard let (early exit)
+guard let name = name else { return }
+print(name.count)</code></pre>
+            </div>
+        </div>
+
+        <div class="callout compare">
+            <div class="callout-title">Key Differences</div>
+            <div class="callout-content">
+                <ul>
+                    <li><code>null</code> → <code>nil</code></li>
+                    <li><code>?.length</code> → <code>?.count</code> (Strings use <code>count</code> in Swift)</li>
+                    <li><code>!!</code> → <code>!</code> (force unwrap)</li>
+                    <li><code>?.let { }</code> → <code>if let</code> or <code>map</code></li>
+                    <li>No smart cast — use <code>if let</code> or <code>guard let</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Guard Statements</h3>
+        <p>Swift's <code>guard</code> is for early exit — similar to Kotlin's <code>?: return</code> but more readable:
+        </p>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">func processUser(id: String?) {
+    // Guard requires early exit (return, throw, continue, break)
+    guard let id = id else {
+        print("No ID provided")
+        return
+    }
+
+    // id is now non-optional String for rest of function
+    guard id.count > 0 else {
+        print("Empty ID")
+        return
+    }
+
+    // Multiple conditions
+    guard let user = fetchUser(id: id),
+          user.isActive,
+          let email = user.email else {
+        return
+    }
+
+    sendEmail(to: email)
+}</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Structs vs Classes (Value vs Reference Types)</h2>
+        <p>This is a fundamental difference from Kotlin. Swift has true value types:</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Swift <code>struct</code></th>
+                    <th>Swift <code>class</code></th>
+                    <th>Kotlin <code>data class</code></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Type</td>
+                    <td>Value type</td>
+                    <td>Reference type</td>
+                    <td>Reference type</td>
+                </tr>
+                <tr>
+                    <td>Copying</td>
+                    <td>Deep copy on assignment</td>
+                    <td>Reference copy</td>
+                    <td>Reference copy (<code>.copy()</code> for shallow)</td>
+                </tr>
+                <tr>
+                    <td>Inheritance</td>
+                    <td>Cannot inherit</td>
+                    <td>Can inherit</td>
+                    <td>Can inherit (but limited)</td>
+                </tr>
+                <tr>
+                    <td>Mutability</td>
+                    <td><code>mutating func</code> required</td>
+                    <td>Methods can mutate freely</td>
+                    <td>Methods can mutate freely</td>
+                </tr>
+                <tr>
+                    <td>Default</td>
+                    <td><strong>Preferred for models</strong></td>
+                    <td>Use for identity/inheritance</td>
+                    <td>Preferred for models</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// Struct (value type) - preferred for models
+struct Product: Identifiable, Equatable {
+    let id: UUID
+    var name: String
+    var price: Decimal
+
+    // Mutating method required to modify self
+    mutating func applyDiscount(_ percent: Double) {
+        price *= Decimal(1 - percent / 100)
+    }
+}
+
+// Value semantics
+var product1 = Product(id: UUID(), name: "iPhone", price: 999)
+var product2 = product1  // Deep copy
+product2.name = "iPad"   // Only product2 changes
+
+// Class (reference type) - use for identity/shared state
+class ShoppingCart {
+    var items: [Product] = []
+
+    func add(_ product: Product) {
+        items.append(product)
+    }
+}
+
+// Reference semantics
+let cart1 = ShoppingCart()
+let cart2 = cart1  // Same instance
+cart2.add(product1)
+print(cart1.items.count) // 1 - both references see the change</code></pre>
+        </div>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p><strong>Coming from Kotlin, you might put everything in classes.</strong> In Swift, use structs by
+                    default. Apple's guideline: use structs unless you need inheritance, reference semantics, or
+                    Objective-C interop.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Protocols vs Interfaces</h2>
+        <p>Swift protocols are more powerful than Kotlin interfaces:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">interface Repository&lt;T&gt; {
+    fun getAll(): List&lt;T&gt;
+    fun getById(id: String): T?
+
+    // Default implementation
+    fun isEmpty(): Boolean =
+        getAll().isEmpty()
+}
+
+// Extension on interface
+fun &lt;T&gt; Repository&lt;T&gt;.first(): T? =
+    getAll().firstOrNull()
+
+class UserRepo : Repository&lt;User&gt; {
+    override fun getAll() = listOf()
+    override fun getById(id: String) = null
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">protocol Repository {
+    associatedtype Item  // Associated type
+    func getAll() -> [Item]
+    func getById(_ id: String) -> Item?
+}
+
+// Protocol extension (like interface default)
+extension Repository {
+    func isEmpty() -> Bool {
+        getAll().isEmpty
+    }
+
+    func first() -> Item? {
+        getAll().first
+    }
+}
+
+struct UserRepo: Repository {
+    typealias Item = User
+    func getAll() -> [User] { [] }
+    func getById(_ id: String) -> User? { nil }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Protocol-Oriented Programming</h3>
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// Protocols can be composed
+protocol Identifiable {
+    var id: String { get }
+}
+
+protocol Nameable {
+    var name: String { get }
+}
+
+// Protocol composition
+typealias Entity = Identifiable & Nameable
+
+// Constrained extensions
+extension Collection where Element: Identifiable {
+    func find(id: String) -> Element? {
+        first { $0.id == id }
+    }
+}
+
+// Protocol with Self requirement
+protocol Copyable {
+    func copy() -> Self
+}</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Enums with Associated Values</h2>
+        <p>Swift enums are algebraic data types — far more powerful than Kotlin sealed classes:</p>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">sealed class Result&lt;out T&gt; {
+    data class Success&lt;T&gt;(val data: T) : Result&lt;T&gt;()
+    data class Error(val message: String) : Result&lt;Nothing&gt;()
+    object Loading : Result&lt;Nothing&gt;()
+}
+
+// Usage
+when (val result = fetchUser()) {
+    is Result.Success -> println(result.data)
+    is Result.Error -> println(result.message)
+    Result.Loading -> showSpinner()
+}</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">enum Result&lt;T&gt; {
+    case success(T)
+    case failure(Error)
+    case loading
+}
+
+// Usage
+switch fetchUser() {
+case .success(let user):
+    print(user)
+case .failure(let error):
+    print(error.localizedDescription)
+case .loading:
+    showSpinner()
+}
+
+// if-case for single case
+if case .success(let user) = result {
+    print(user)
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// Rich enum with computed properties and methods
+enum NetworkError: Error {
+    case notConnected
+    case timeout(seconds: Int)
+    case httpError(statusCode: Int, message: String)
+    case unknown(Error)
+
+    var isRetryable: Bool {
+        switch self {
+        case .notConnected, .timeout:
+            return true
+        case .httpError(let code, _):
+            return code >= 500
+        case .unknown:
+            return false
+        }
+    }
+
+    var localizedDescription: String {
+        switch self {
+        case .notConnected:
+            return "No internet connection"
+        case .timeout(let seconds):
+            return "Request timed out after \(seconds)s"
+        case .httpError(let code, let message):
+            return "HTTP \(code): \(message)"
+        case .unknown(let error):
+            return error.localizedDescription
+        }
+    }
+}</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Extensions</h2>
+        <p>Both languages have extensions, but Swift extensions are more prevalent and powerful:</p>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// Extend any type
+extension String {
+    var isValidEmail: Bool {
+        contains("@") && contains(".")
+    }
+
+    func truncated(to length: Int) -> String {
+        if count <= length { return self }
+        return prefix(length) + "..."
+    }
+}
+
+// Add protocol conformance via extension
+extension String: Identifiable {
+    public var id: String { self }
+}
+
+// Conditional extensions
+extension Array where Element: Numeric {
+    var sum: Element {
+        reduce(0, +)
+    }
+}
+
+// Extend protocols
+extension Collection {
+    var isNotEmpty: Bool { !isEmpty }
+}</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <div class="callout-title">Extension Organizing</div>
+            <div class="callout-content">
+                <p>Swift convention: use extensions to organize code within a file. Group protocol conformances and
+                    related methods in separate extensions:</p>
+                <pre><code class="language-swift">class UserViewModel { }
+
+extension UserViewModel: ObservableObject { }
+
+extension UserViewModel {
+    // MARK: - Actions
+    func loadUser() { }
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Closures (Lambdas)</h2>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Lambda syntax
+val double: (Int) -> Int = { x -> x * 2 }
+
+// Implicit it
+val triple: (Int) -> Int = { it * 3 }
+
+// Trailing lambda
+list.filter { it > 10 }
+    .map { it * 2 }
+
+// Higher-order function
+fun &lt;T&gt; List&lt;T&gt;.customFilter(
+    predicate: (T) -> Boolean
+): List&lt;T&gt; { ... }</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Closure syntax
+let double: (Int) -> Int = { x in x * 2 }
+
+// Shorthand $0, $1, etc.
+let triple: (Int) -> Int = { $0 * 3 }
+
+// Trailing closure
+list.filter { $0 > 10 }
+    .map { $0 * 2 }
+
+// Higher-order function
+func customFilter&lt;T&gt;(
+    _ predicate: (T) -> Bool
+) -> [T] { ... }</code></pre>
+            </div>
+        </div>
+
+        <h3>Escaping and Autoclosures</h3>
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// @escaping: closure outlives the function call
+func fetchData(completion: @escaping (Data) -> Void) {
+    DispatchQueue.global().async {
+        let data = loadFromNetwork()
+        completion(data)  // Called after function returns
+    }
+}
+
+// @autoclosure: automatically wraps expression in closure
+func assert(_ condition: @autoclosure () -> Bool) {
+    if !condition() { fatalError() }
+}
+// Usage: assert(x > 0)  // Not assert({ x > 0 })
+
+// Capturing values
+var counter = 0
+let increment = { counter += 1 }  // Captures counter by reference
+increment()
+print(counter) // 1</code></pre>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Error Handling</h2>
+
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin</span></div>
+                <pre><code class="language-kotlin">// Unchecked exceptions
+fun fetchUser(): User {
+    throw IOException("Network error")
+}
+
+// Catch
+try {
+    val user = fetchUser()
+} catch (e: IOException) {
+    println(e.message)
+}
+
+// Result type
+fun fetchUserSafe(): Result&lt;User&gt; =
+    runCatching { fetchUser() }</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift</span></div>
+                <pre><code class="language-swift">// Throwing functions (marked explicitly)
+func fetchUser() throws -> User {
+    throw NetworkError.notConnected
+}
+
+// do-catch
+do {
+    let user = try fetchUser()
+} catch NetworkError.notConnected {
+    print("No connection")
+} catch {
+    print(error)  // Implicit 'error' binding
+}
+
+// try? returns optional
+let user = try? fetchUser()  // User?
+
+// try! force unwrap (crashes on error)
+let user = try! fetchUser()</code></pre>
+            </div>
+        </div>
+
+        <div class="callout compare">
+            <div class="callout-title">Key Difference</div>
+            <div class="callout-content">
+                <p>Swift has "checked" throwing functions — you must handle <code>throws</code> at every call site with
+                    <code>try</code>, <code>try?</code>, or <code>try!</code>. This is similar to Java's checked
+                    exceptions but lighter-weight. Kotlin uses unchecked exceptions throughout.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Generics</h2>
+
+        <div class="code-block">
+            <div class="code-block-header">
+                <span class="code-block-lang">Swift</span>
+            </div>
+            <pre><code class="language-swift">// Generic function
+func swap&lt;T&gt;(_ a: inout T, _ b: inout T) {
+    let temp = a
+    a = b
+    b = temp
+}
+
+// Generic type with constraints
+struct Cache&lt;Key: Hashable, Value&gt; {
+    private var storage: [Key: Value] = [:]
+
+    mutating func set(_ value: Value, for key: Key) {
+        storage[key] = value
+    }
+
+    func get(_ key: Key) -> Value? {
+        storage[key]
+    }
+}
+
+// Where clause for complex constraints
+func findCommon&lt;T, U&gt;(_ first: T, _ second: U) -> [T.Element]
+    where T: Sequence, U: Sequence, T.Element == U.Element, T.Element: Equatable {
+    first.filter { second.contains($0) }
+}
+
+// some keyword (opaque return types)
+func makeCollection() -> some Collection {
+    [1, 2, 3]  // Hides concrete type
+}
+
+// any keyword (existential types)
+var items: [any Equatable] = [1, "hello", 3.14]</code></pre>
+        </div>
+    </section>
+
+    <!-- Common Pitfalls -->
+    <section class="section">
+        <h2>Common Pitfalls for Kotlin Developers</h2>
+        <ul class="pitfalls-list">
+            <li><strong>Forgetting argument labels:</strong> Swift requires argument labels at call sites by default.
+                Either include them or use <code>_</code> in the function definition.
+            </li>
+            <li><strong>Using <code>==</code> for reference equality:</strong> In Swift, <code>==</code> is value
+                equality (like Kotlin's <code>==</code>), and <code>===</code> is reference identity (like Kotlin's
+                <code>===</code>). Same behavior, but remember Swift structs are compared by value.
+            </li>
+            <li><strong>Expecting smart casts:</strong> Swift doesn't have smart casts. Use <code>if let</code>, <code>guard
+                let</code>, or <code>as?</code> with explicit binding.
+            </li>
+            <li><strong>Modifying struct properties without <code>mutating</code>:</strong> Struct methods that modify
+                <code>self</code> must be marked <code>mutating</code>.
+            </li>
+            <li><strong>Using classes for everything:</strong> Swift prefers structs. Use classes only for reference
+                semantics, inheritance, or Objective-C interop.
+            </li>
+            <li><strong>Forgetting <code>@escaping</code>:</strong> Closures stored for later execution must be marked
+                <code>@escaping</code>. The compiler will tell you, but understand why.
+            </li>
+            <li><strong>Force unwrapping optionals:</strong> Avoid <code>!</code> except in tests or truly invariant
+                situations. Use <code>guard let</code> or <code>if let</code>.
+            </li>
+            <li><strong>Not using <code>switch</code> exhaustiveness:</strong> Swift switch must be exhaustive. Use this
+                to your advantage — the compiler catches missing cases.
+            </li>
+        </ul>
+    </section>
+
+    <!-- Industry Pattern -->
+    <section class="industry-pattern">
+        <h2>Industry Pattern</h2>
+        <p>Production Swift code follows these conventions:</p>
+        <ul>
+            <li><strong>Structs by default:</strong> Models, DTOs, view state — all structs. Classes for ViewModels that
+                need reference semantics and ObservableObject conformance.
+            </li>
+            <li><strong>Protocol-first design:</strong> Define protocols for dependencies, then implement. Enables easy
+                testing and SwiftUI previews.
+            </li>
+            <li><strong>Result type or throws:</strong> Use Swift's built-in <code>Result</code> type or throwing
+                functions for error handling. Avoid callback pyramids.
+            </li>
+            <li><strong>Extension organization:</strong> Group related functionality in extensions within the same file.
+                Use <code>// MARK:</code> comments.
+            </li>
+            <li><strong>Guard for early exit:</strong> Prefer <code>guard let</code> over nested <code>if let</code> to
+                reduce nesting and improve readability.
+            </li>
+        </ul>
+    </section>
+
+    <!-- Mini App Reference -->
+    <div class="mini-app-reference">
+        <h4>Mini App: Catalog</h4>
+        <p>Define the core models using Swift structs and enums. Create a <code>Product</code> struct and a <code>LoadState</code>
+            enum with associated values.</p>
+    </div>
+
+    <!-- Exercise -->
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Convert this Kotlin data model to idiomatic Swift:</p>
+        <pre><code class="language-kotlin">// Kotlin
+data class Product(
+    val id: String,
+    val name: String,
+    val price: Double,
+    val category: Category?
+)
+
+sealed class Category {
+    object Electronics : Category()
+    object Clothing : Category()
+    data class Other(val name: String) : Category()
+}
+
+sealed class LoadState&lt;out T&gt; {
+    object Loading : LoadState&lt;Nothing&gt;()
+    data class Success&lt;T&gt;(val data: T) : LoadState&lt;T&gt;()
+    data class Error(val message: String) : LoadState&lt;Nothing&gt;()
+}</code></pre>
+        <p><strong>Expected Swift:</strong></p>
+        <pre><code class="language-swift">struct Product: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let price: Double
+    let category: Category?
+}
+
+enum Category: Equatable {
+    case electronics
+    case clothing
+    case other(name: String)
+}
+
+enum LoadState&lt;T: Equatable&gt;: Equatable {
+    case loading
+    case success(T)
+    case failure(String)
+}</code></pre>
+    </section>
+
+    <!-- Module Checklist -->
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Map basic Kotlin syntax to Swift equivalents</li>
+            <li>Handle optionals with if let, guard let, and nil-coalescing</li>
+            <li>Understand struct vs class (value vs reference types)</li>
+            <li>Use protocols with extensions and associated types</li>
+            <li>Create enums with associated values</li>
+            <li>Complete the hands-on exercise</li>
+        </ul>
+    </section>
+
+    <!-- Cheat Sheet -->
+    <section class="cheat-sheet">
+        <h2>Quick Reference Cheat Sheet</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Kotlin</th>
+                    <th>Swift</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>val</code> / <code>var</code></td>
+                    <td><code>let</code> / <code>var</code></td>
+                </tr>
+                <tr>
+                    <td><code>fun</code></td>
+                    <td><code>func</code></td>
+                </tr>
+                <tr>
+                    <td><code>null</code></td>
+                    <td><code>nil</code></td>
+                </tr>
+                <tr>
+                    <td><code>it</code></td>
+                    <td><code>$0</code></td>
+                </tr>
+                <tr>
+                    <td><code>listOf()</code></td>
+                    <td><code>[]</code></td>
+                </tr>
+                <tr>
+                    <td><code>mapOf()</code></td>
+                    <td><code>[:]</code></td>
+                </tr>
+                <tr>
+                    <td><code>when</code></td>
+                    <td><code>switch</code></td>
+                </tr>
+                <tr>
+                    <td><code>is</code></td>
+                    <td><code>is</code></td>
+                </tr>
+                <tr>
+                    <td><code>as?</code></td>
+                    <td><code>as?</code></td>
+                </tr>
+                <tr>
+                    <td><code>!!</code></td>
+                    <td><code>!</code></td>
+                </tr>
+                <tr>
+                    <td><code>?:</code></td>
+                    <td><code>??</code></td>
+                </tr>
+                <tr>
+                    <td><code>data class</code></td>
+                    <td><code>struct</code></td>
+                </tr>
+                <tr>
+                    <td><code>sealed class</code></td>
+                    <td><code>enum</code></td>
+                </tr>
+                <tr>
+                    <td><code>interface</code></td>
+                    <td><code>protocol</code></td>
+                </tr>
+                <tr>
+                    <td><code>object</code></td>
+                    <td><code>static</code> members</td>
+                </tr>
+                <tr>
+                    <td><code>"$variable"</code></td>
+                    <td><code>"\(variable)"</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- References -->
+    <section class="references">
+        <h2>References</h2>
+        <ul>
+            <li><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/"
+                   rel="noopener" target="_blank">The Swift Programming Language (Official Book)</a></li>
+            <li><a href="https://developer.apple.com/documentation/swift" rel="noopener" target="_blank">Apple Swift
+                Documentation</a></li>
+            <li><a href="https://developer.apple.com/swift/resources/" rel="noopener" target="_blank">Apple Swift
+                Resources</a></li>
+            <li><a href="https://github.com/apple/swift-evolution" rel="noopener"
+                   target="_blank">apple/swift-evolution</a> — Track Swift language changes and proposals
+            </li>
+            <li><a href="https://github.com/raywenderlich/swift-style-guide" rel="noopener" target="_blank">raywenderlich/swift-style-guide</a>
+                — Industry-standard Swift style guide
+            </li>
+        </ul>
+    </section>
+
+    <!-- Module Navigation -->
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="01-mindset-lifecycle.html">
+            <span class="module-nav-label">← Previous</span>
+            <span class="module-nav-title">Mindset & Lifecycle</span>
+        </a>
+        <a class="module-nav-link next" href="03-swiftui-uikit-interop.html">
+            <span class="module-nav-label">Next →</span>
+            <span class="module-nav-title">SwiftUI & UIKit</span>
+        </a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

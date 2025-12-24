@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="index, follow" name="robots">
+    <meta content="iOS networking with URLSession for Android developers familiar with Retrofit. Learn modern async networking patterns and Codable."
+          name="description">
+    <title>iOS Networking | iOS for Android Developers</title>
+
+    <!-- Canonical URL -->
+    <link href="https://aabolfazl.github.io/android-ios-bridge/modules/06-networking.html" rel="canonical">
+
+    <!-- Favicon -->
+    <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="../site.webmanifest" rel="manifest">
+    <meta content="#0d1117" name="theme-color">
+
+    <!-- Open Graph -->
+    <meta content="article" property="og:type">
+    <meta content="iOS Networking | iOS for Android Developers" property="og:title">
+    <meta content="iOS networking with URLSession for Android developers familiar with Retrofit."
+          property="og:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/modules/06-networking.html" property="og:url">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" property="og:image">
+    <meta content="Skill Bridge" property="og:site_name">
+
+    <!-- Twitter Card -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="iOS Networking | iOS for Android Developers" name="twitter:title">
+    <meta content="iOS networking with URLSession for Retrofit developers." name="twitter:description">
+    <meta content="https://aabolfazl.github.io/android-ios-bridge/assets/img/og-default.png" name="twitter:image">
+
+    <!-- Stylesheets -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="site-logo" href="../index.html">Skill Bridge</a>
+        <nav class="header-nav">
+            <select aria-label="Jump to module" class="module-select" id="moduleSelect">
+                <option value="">Jump to...</option>
+                <option value="01-mindset-lifecycle.html">01 Mindset</option>
+                <option value="02-swift-for-kotlin.html">02 Swift</option>
+                <option value="03-swiftui-uikit-interop.html">03 SwiftUI</option>
+                <option value="04-architecture-state.html">04 Architecture</option>
+                <option value="05-concurrency.html">05 Concurrency</option>
+                <option selected value="06-networking.html">06 Networking</option>
+                <option value="07-persistence.html">07 Persistence</option>
+                <option value="08-di-spm.html">08 DI & SPM</option>
+                <option value="09-testing.html">09 Testing</option>
+                <option value="10-debugging-shipping.html">10 Shipping</option>
+            </select>
+            <button aria-label="Toggle theme" class="theme-toggle-btn" id="themeToggle">◐</button>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content" id="main-content">
+    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-sep">/</span><span>Module 6</span>
+    </nav>
+
+    <header class="module-header">
+        <span class="module-number">06</span>
+        <h1>Networking</h1>
+        <p class="module-description">Master URLSession and modern networking patterns. Compare with Retrofit and OkHttp
+            approaches.</p>
+        <div class="estimated-time">Estimated time: 30 minutes</div>
+    </header>
+
+    <section class="outcomes">
+        <h2>Learning Outcomes</h2>
+        <ul>
+            <li>Use URLSession for network requests</li>
+            <li>Implement async/await networking</li>
+            <li>Handle JSON encoding/decoding with Codable</li>
+            <li>Build a reusable API client</li>
+            <li>Handle errors and response validation</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Networking Concept Mapping</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Android</th>
+                    <th>iOS</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Retrofit</code></td>
+                    <td><code>URLSession</code> + protocols</td>
+                    <td>iOS has no annotation-based API client. Build manually or use Alamofire.</td>
+                </tr>
+                <tr>
+                    <td><code>OkHttp</code></td>
+                    <td><code>URLSession</code></td>
+                    <td>Both handle connection pooling, caching, HTTP/2 automatically.</td>
+                </tr>
+                <tr>
+                    <td><code>Gson</code> / <code>Moshi</code></td>
+                    <td><code>Codable</code></td>
+                    <td>Codable is built into Swift. Compiler generates code automatically.</td>
+                </tr>
+                <tr>
+                    <td><code>@GET</code>, <code>@POST</code></td>
+                    <td><code>URLRequest</code></td>
+                    <td>Manually configure method, headers, body on URLRequest.</td>
+                </tr>
+                <tr>
+                    <td><code>Interceptor</code></td>
+                    <td><code>URLSessionDelegate</code></td>
+                    <td>Delegates handle auth challenges, redirects, metrics.</td>
+                </tr>
+                <tr>
+                    <td><code>Call&lt;T&gt;</code></td>
+                    <td><code>async throws -> T</code></td>
+                    <td>Swift uses native async/await instead of callback wrappers.</td>
+                </tr>
+                <tr>
+                    <td><code>Response&lt;T&gt;</code></td>
+                    <td><code>(Data, URLResponse)</code></td>
+                    <td>URLSession returns tuple of data and response metadata.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>URLSession Basics</h2>
+        <p>URLSession is iOS's built-in networking API. Unlike Retrofit where you define interfaces with annotations,
+            iOS requires building requests manually. The modern approach uses async/await.</p>
+
+        <h3>Simple GET Request</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Retrofit</span></div>
+                <pre><code class="language-kotlin">// Define interface
+interface ApiService {
+    @GET("users/{id}")
+    suspend fun getUser(@Path("id") id: String): User
+}
+
+// Usage
+val user = apiService.getUser("123")</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">URLSession</span></div>
+                <pre><code class="language-swift">// Direct function
+func getUser(id: String) async throws -> User {
+    let url = URL(string: "\(baseURL)/users/\(id)")!
+    let (data, response) = try await URLSession.shared.data(from: url)
+
+    guard let httpResponse = response as? HTTPURLResponse,
+          httpResponse.statusCode == 200 else {
+        throw NetworkError.invalidResponse
+    }
+
+    return try JSONDecoder().decode(User.self, from: data)
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>POST Request with Body</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Retrofit</span></div>
+                <pre><code class="language-kotlin">@POST("users")
+suspend fun createUser(@Body user: CreateUserRequest): User</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">URLSession</span></div>
+                <pre><code class="language-swift">func createUser(_ request: CreateUserRequest) async throws -> User {
+    var urlRequest = URLRequest(url: URL(string: "\(baseURL)/users")!)
+    urlRequest.httpMethod = "POST"
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    urlRequest.httpBody = try JSONEncoder().encode(request)
+
+    let (data, _) = try await URLSession.shared.data(for: urlRequest)
+    return try JSONDecoder().decode(User.self, from: data)
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Codable Protocol</h2>
+        <p>Codable is Swift's built-in serialization protocol, combining <code>Encodable</code> and
+            <code>Decodable</code>. Unlike Gson/Moshi, the compiler generates the code automatically for simple cases.
+        </p>
+
+        <h3>Basic Codable Model</h3>
+        <div class="code-compare">
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-android">Kotlin + Moshi</span></div>
+                <pre><code class="language-kotlin">@JsonClass(generateAdapter = true)
+data class User(
+    @Json(name = "id") val id: String,
+    @Json(name = "user_name") val userName: String,
+    @Json(name = "created_at") val createdAt: Date
+)</code></pre>
+            </div>
+            <div class="code-compare-block">
+                <div class="code-compare-label"><span class="platform-ios">Swift Codable</span></div>
+                <pre><code class="language-swift">struct User: Codable {
+    let id: String
+    let userName: String
+    let createdAt: Date
+
+    // Custom key mapping
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userName = "user_name"
+        case createdAt = "created_at"
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Configuring JSONDecoder</h3>
+        <pre><code class="language-swift">let decoder = JSONDecoder()
+
+// Snake case conversion (user_name -> userName)
+decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+// Date parsing
+decoder.dateDecodingStrategy = .iso8601
+
+// Or custom date format
+let formatter = DateFormatter()
+formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+decoder.dateDecodingStrategy = .formatted(formatter)
+
+// Usage
+let user = try decoder.decode(User.self, from: jsonData)</code></pre>
+
+        <div class="callout compare">
+            <div class="callout-title">Android to iOS</div>
+            <div class="callout-content">
+                <p>Unlike Moshi/Gson where you annotate fields, Swift's Codable uses <code>CodingKeys</code> enum for
+                    key mapping. The <code>.convertFromSnakeCase</code> strategy eliminates most manual mapping. Codable
+                    is stricter than Gson—missing required fields throw errors instead of setting null.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Building an API Client</h2>
+        <p>To achieve Retrofit-like ergonomics, build a reusable API client with generics and protocols.</p>
+
+        <pre><code class="language-swift">// API Client Protocol
+protocol APIClient {
+    func request&lt;T: Decodable&gt;(_ endpoint: Endpoint) async throws -> T
+}
+
+// Endpoint Definition
+struct Endpoint {
+    let path: String
+    let method: HTTPMethod
+    let headers: [String: String]
+    let body: Encodable?
+
+    enum HTTPMethod: String {
+        case get = "GET"
+        case post = "POST"
+        case put = "PUT"
+        case delete = "DELETE"
+    }
+}
+
+// Implementation
+class URLSessionAPIClient: APIClient {
+    private let baseURL: URL
+    private let session: URLSession
+    private let decoder: JSONDecoder
+
+    init(baseURL: URL, session: URLSession = .shared) {
+        self.baseURL = baseURL
+        self.session = session
+        self.decoder = JSONDecoder()
+        self.decoder.keyDecodingStrategy = .convertFromSnakeCase
+    }
+
+    func request&lt;T: Decodable&gt;(_ endpoint: Endpoint) async throws -> T {
+        var request = URLRequest(url: baseURL.appendingPathComponent(endpoint.path))
+        request.httpMethod = endpoint.method.rawValue
+
+        endpoint.headers.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        if let body = endpoint.body {
+            request.httpBody = try JSONEncoder().encode(body)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            throw APIError.httpError(statusCode: httpResponse.statusCode, data: data)
+        }
+
+        return try decoder.decode(T.self, from: data)
+    }
+}
+
+// Usage - Clean like Retrofit
+let client = URLSessionAPIClient(baseURL: URL(string: "https://api.example.com")!)
+let user: User = try await client.request(Endpoint(
+    path: "/users/123",
+    method: .get,
+    headers: [:],
+    body: nil
+))</code></pre>
+
+        <div class="callout tip">
+            <div class="callout-title">Tip</div>
+            <div class="callout-content">
+                <p>Consider using <a href="https://github.com/Alamofire/Alamofire" target="_blank">Alamofire</a> for
+                    complex networking needs. It provides Retrofit-like features: request/response interceptors,
+                    automatic retry, multipart uploads, and certificate pinning—all with a cleaner API than raw
+                    URLSession.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Error Handling</h2>
+        <p>Define typed errors for better error handling throughout your app.</p>
+
+        <pre><code class="language-swift">enum APIError: Error {
+    case invalidURL
+    case invalidResponse
+    case httpError(statusCode: Int, data: Data)
+    case decodingError(Error)
+    case networkError(Error)
+
+    var userMessage: String {
+        switch self {
+        case .invalidURL:
+            return "Invalid request URL"
+        case .invalidResponse:
+            return "Invalid server response"
+        case .httpError(let statusCode, _):
+            switch statusCode {
+            case 401: return "Please log in again"
+            case 403: return "You don't have permission"
+            case 404: return "Resource not found"
+            case 500...599: return "Server error. Please try again."
+            default: return "Request failed"
+            }
+        case .decodingError:
+            return "Failed to process response"
+        case .networkError:
+            return "Network connection failed"
+        }
+    }
+}
+
+// Usage with proper error handling
+func loadUser() async {
+    do {
+        user = try await apiClient.getUser(id: userId)
+    } catch let error as APIError {
+        errorMessage = error.userMessage
+    } catch {
+        errorMessage = "An unexpected error occurred"
+    }
+}</code></pre>
+
+        <div class="callout pitfall">
+            <div class="callout-title">Common Pitfall</div>
+            <div class="callout-content">
+                <p>URLSession doesn't throw errors for HTTP 4xx/5xx responses—it only throws for network failures.
+                    Always check the status code manually: <code>guard
+                        (200...299).contains(httpResponse.statusCode)</code>. This is different from Retrofit where you
+                    can configure it to throw on error status codes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Authentication and Headers</h2>
+        <p>Add authentication tokens and custom headers using URLSession configuration or per-request.</p>
+
+        <h3>Per-Request Headers</h3>
+        <pre><code class="language-swift">var request = URLRequest(url: url)
+request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Accept")</code></pre>
+
+        <h3>Session-Wide Configuration</h3>
+        <pre><code class="language-swift">// Create custom configuration
+let config = URLSessionConfiguration.default
+config.httpAdditionalHeaders = [
+    "Authorization": "Bearer \(token)",
+    "X-API-Key": apiKey
+]
+config.timeoutIntervalForRequest = 30
+config.waitsForConnectivity = true
+
+// Create session with configuration
+let session = URLSession(configuration: config)</code></pre>
+
+        <h3>Token Refresh with Delegate</h3>
+        <pre><code class="language-swift">class AuthenticatedSession: NSObject, URLSessionTaskDelegate {
+    private let tokenProvider: TokenProvider
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        // Handle authentication challenges
+        completionHandler(.performDefaultHandling, nil)
+    }
+
+    // For automatic token refresh, intercept 401 responses
+    // and retry with new token
+}</code></pre>
+    </section>
+
+    <section class="section">
+        <h2>Common Pitfalls</h2>
+        <ul class="pitfalls-list">
+            <li><strong>Not checking HTTP status codes</strong>: URLSession considers 404 a "success" if data was
+                received.
+            </li>
+            <li><strong>Forgetting Content-Type header</strong>: POST/PUT requests need <code>Content-Type:
+                application/json</code>.
+            </li>
+            <li><strong>Using AnyEncodable wrappers incorrectly</strong>: Codable requires concrete types. Use generics
+                instead.
+            </li>
+            <li><strong>Not handling Codable optionals</strong>: Missing JSON keys cause decoding failure unless
+                property is optional.
+            </li>
+            <li><strong>Blocking main thread</strong>: Always use async/await or completion handlers for network calls.
+            </li>
+            <li><strong>Not configuring timeout</strong>: Default timeout is 60 seconds. Set appropriate values for your
+                use case.
+            </li>
+        </ul>
+    </section>
+
+    <section class="progress-checklist">
+        <h3>What You Have Done</h3>
+        <ul>
+            <li>Make basic URLSession requests</li>
+            <li>Use Codable for JSON</li>
+            <li>Build reusable API client</li>
+            <li>Handle errors properly</li>
+            <li>Add authentication</li>
+            <li>Complete hands-on exercise</li>
+        </ul>
+    </section>
+
+    <section class="exercise">
+        <h2>Hands-On Exercise</h2>
+        <p>Build a GitHub API client that fetches repositories and user profiles.</p>
+        <ol>
+            <li><strong>Define Models</strong>: Create <code>GitHubUser</code> and <code>Repository</code> Codable
+                structs matching the GitHub API response.
+            </li>
+            <li><strong>Build API Client</strong>: Create <code>GitHubAPIClient</code> with methods for <code>getUser(username:)</code>
+                and <code>getRepositories(username:)</code>.
+            </li>
+            <li><strong>Handle Pagination</strong>: GitHub uses Link headers for pagination. Parse them to support
+                loading more results.
+            </li>
+            <li><strong>Add Rate Limit Handling</strong>: Check <code>X-RateLimit-Remaining</code> header and show
+                appropriate UI when limited.
+            </li>
+            <li><strong>Create SwiftUI View</strong>: Build a profile screen showing user info and their repositories
+                list.
+            </li>
+        </ol>
+    </section>
+
+    <section class="cheat-sheet">
+        <h2>Quick Reference</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Operation</th>
+                    <th>Swift Code</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>GET request</td>
+                    <td><code>try await URLSession.shared.data(from: url)</code></td>
+                </tr>
+                <tr>
+                    <td>POST request</td>
+                    <td><code>try await URLSession.shared.data(for: request)</code></td>
+                </tr>
+                <tr>
+                    <td>Decode JSON</td>
+                    <td><code>try JSONDecoder().decode(T.self, from: data)</code></td>
+                </tr>
+                <tr>
+                    <td>Encode JSON</td>
+                    <td><code>try JSONEncoder().encode(object)</code></td>
+                </tr>
+                <tr>
+                    <td>Set header</td>
+                    <td><code>request.setValue(value, forHTTPHeaderField: key)</code></td>
+                </tr>
+                <tr>
+                    <td>Set method</td>
+                    <td><code>request.httpMethod = "POST"</code></td>
+                </tr>
+                <tr>
+                    <td>Set body</td>
+                    <td><code>request.httpBody = data</code></td>
+                </tr>
+                <tr>
+                    <td>Check status</td>
+                    <td><code>(response as? HTTPURLResponse)?.statusCode</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="references">
+        <h2>References</h2>
+        <ul>
+            <li><a href="https://developer.apple.com/documentation/foundation/urlsession" rel="noopener"
+                   target="_blank">Apple URLSession Documentation</a> - Official networking framework reference
+            </li>
+            <li>
+                <a href="https://developer.apple.com/documentation/foundation/archives_and_serialization/encoding_and_decoding_custom_types"
+                   rel="noopener" target="_blank">Encoding and Decoding Custom Types</a> - Official Codable guide
+            </li>
+            <li><a href="https://github.com/Alamofire/Alamofire" rel="noopener" target="_blank">Alamofire</a> - Popular
+                networking library with Retrofit-like features
+            </li>
+            <li><a href="https://developer.apple.com/videos/play/wwdc2021/10095/" rel="noopener" target="_blank">WWDC21:
+                Use async/await with URLSession</a> - Modern networking patterns
+            </li>
+        </ul>
+    </section>
+
+    <nav aria-label="Module navigation" class="module-nav">
+        <a class="module-nav-link prev" href="05-concurrency.html"><span class="module-nav-label">Previous</span><span
+                class="module-nav-title">Concurrency</span></a>
+        <a class="module-nav-link next" href="07-persistence.html"><span class="module-nav-label">Next</span><span
+                class="module-nav-title">Persistence</span></a>
+    </nav>
+
+    <footer class="site-footer">
+        <div class="author-profile">
+            <img alt="Abolfazl Abbasi" class="author-avatar" src="https://github.com/aabolfazl.png">
+            <div class="author-info">
+                <span class="author-name">Abolfazl Abbasi</span>
+                <span class="author-credit">Every Day Curious</span>
+            </div>
+        </div>
+        <a class="author-link" href="https://github.com/aabolfazl" rel="noopener" target="_blank">@aabolfazl</a>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

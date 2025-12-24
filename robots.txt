@@ -1,0 +1,7 @@
+# robots.txt for iOS for Android Developers
+# https://aabolfazl.github.io/android-ios-bridge/
+
+User-agent: *
+Allow: /
+
+Sitemap: https://aabolfazl.github.io/android-ios-bridge/sitemap.xml
